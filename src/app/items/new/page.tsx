@@ -80,8 +80,11 @@ export default function NewItem() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center dark-theme">
+        <div className="dark-card p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-400 text-center">Memuat...</p>
+        </div>
       </div>
     );
   }
@@ -92,37 +95,37 @@ export default function NewItem() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen dark-theme pt-16">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Tambah Barang Baru</h1>
-          <p className="mt-2 text-gray-600">Tambahkan barang baru ke dalam loker</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-100 mb-2">Tambah Barang Baru</h1>
+          <p className="text-gray-400">Tambahkan barang baru ke dalam loker</p>
         </div>
 
         {lockers.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Belum ada loker</h3>
-            <p className="text-gray-600 mb-4">Anda perlu membuat loker terlebih dahulu sebelum menambah barang.</p>
+          <div className="dark-card p-8 text-center">
+            <Package className="mx-auto h-16 w-16 text-gray-500 mb-6" />
+            <h3 className="text-xl font-medium text-gray-200 mb-2">Belum ada loker</h3>
+            <p className="text-gray-400 mb-6">Anda perlu membuat loker terlebih dahulu sebelum menambah barang.</p>
             <Link
               href="/lockers/new"
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center space-x-2 px-6 py-3 dark-button-primary text-white font-medium transition-all duration-200"
             >
               <span>Buat Loker</span>
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="dark-card p-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-3">
                   Nama Barang *
                 </label>
                 <input
@@ -133,12 +136,12 @@ export default function NewItem() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Contoh: Buku Harry Potter, Charger Laptop, dst"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full dark-input text-gray-200 placeholder-gray-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-3">
                   Kategori *
                 </label>
                 <input
@@ -149,12 +152,12 @@ export default function NewItem() {
                   value={formData.category}
                   onChange={handleChange}
                   placeholder="Contoh: Elektronik, Buku, Pakaian, dst"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full dark-input text-gray-200 placeholder-gray-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="quantity" className="block text-sm font-medium text-gray-300 mb-3">
                   Jumlah *
                 </label>
                 <input
@@ -165,12 +168,12 @@ export default function NewItem() {
                   min="1"
                   value={formData.quantity}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full dark-input text-gray-200"
                 />
               </div>
 
               <div>
-                <label htmlFor="lockerId" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="lockerId" className="block text-sm font-medium text-gray-300 mb-3">
                   Loker *
                 </label>
                 <select
@@ -179,7 +182,7 @@ export default function NewItem() {
                   required
                   value={formData.lockerId}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full dark-input text-gray-200"
                 >
                   <option value="">Pilih Loker</option>
                   {lockers.map((locker) => (
@@ -191,32 +194,32 @@ export default function NewItem() {
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-3">
                   Deskripsi
                 </label>
                 <textarea
                   id="description"
                   name="description"
-                  rows={3}
+                  rows={4}
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Deskripsi tambahan tentang barang (opsional)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full dark-input text-gray-200 placeholder-gray-500 resize-none"
                 />
               </div>
 
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end space-x-4 pt-6">
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200 font-medium"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                  className="flex items-center space-x-2 px-6 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save size={20} />
                   <span>{loading ? 'Menyimpan...' : 'Simpan Barang'}</span>

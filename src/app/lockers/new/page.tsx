@@ -78,8 +78,11 @@ export default function NewLocker() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center dark-theme">
+        <div className="dark-card p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-400 text-center">Memuat...</p>
+        </div>
       </div>
     );
   }
@@ -90,24 +93,24 @@ export default function NewLocker() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen dark-theme pt-16">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Tambah Loker Baru</h1>
-          <p className="mt-2 text-gray-600">Buat loker baru dengan QR code untuk mengelola barang</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-100 mb-2">Tambah Loker Baru</h1>
+          <p className="text-gray-400">Buat loker baru dengan QR code untuk mengelola barang</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="dark-card p-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <label htmlFor="label" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="label" className="block text-sm font-medium text-gray-300 mb-3">
                 Label Loker *
               </label>
               <input
@@ -118,65 +121,65 @@ export default function NewLocker() {
                 value={formData.label}
                 onChange={handleChange}
                 placeholder="Contoh: Loker Kamar Tidur, Rak Buku, dst"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full dark-input text-gray-200 placeholder-gray-500"
               />
             </div>
 
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="code" className="block text-sm font-medium text-gray-300 mb-3">
                 Kode Loker
               </label>
-              <div className="flex space-x-2">
+              <div className="flex space-x-3">
                 <input
                   type="text"
                   id="code"
                   name="code"
                   value={formData.code}
                   readOnly
-                  className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed"
+                  className="flex-1 dark-input text-gray-200 cursor-not-allowed opacity-75"
                 />
                 <button
                   type="button"
                   onClick={generateCode}
-                  className="flex items-center space-x-1 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-3 dark-button text-blue-400 hover:text-blue-300 transition-all duration-200"
                   title="Generate kode baru"
                 >
                   <RefreshCw size={16} />
                   <span>Baru</span>
                 </button>
               </div>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-gray-500">
                 Kode 4 digit yang digenerate otomatis untuk mengidentifikasi loker
               </p>
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-3">
                 Deskripsi
               </label>
               <textarea
                 id="description"
                 name="description"
-                rows={3}
+                rows={4}
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Deskripsi tambahan tentang loker (opsional)"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full dark-input text-gray-200 placeholder-gray-500 resize-none"
               />
             </div>
 
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-end space-x-4 pt-6">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200 font-medium"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="flex items-center space-x-2 px-6 py-3 dark-button text-blue-400 hover:text-blue-300 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={20} />
                 <span>{loading ? 'Menyimpan...' : 'Simpan Loker'}</span>

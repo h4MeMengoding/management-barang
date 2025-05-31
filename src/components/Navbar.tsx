@@ -1,96 +1,70 @@
 'use client';
 
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { LogOut, User } from 'lucide-react';
-
-// Function to generate a consistent avatar URL from email
-function getEmailBasedAvatar(email: string, size: number = 32): string {
-  // Simple hash function for consistent avatar generation
-  let hash = 0;
-  for (let i = 0; i < email.length; i++) {
-    const char = email.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  
-  // Generate a seed based on the hash
-  const seed = Math.abs(hash).toString();
-  
-  // Use DiceBear API for consistent avatar generation
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&size=${size}&backgroundColor=3B82F6`;
-}
-
-// Function to get initials from email
-function getInitialsFromEmail(email: string): string {
-  const username = email.split('@')[0];
-  return username.substring(0, 2).toUpperCase();
-}
+import { usePathname } from 'next/navigation';
+import { LogOut, Package } from 'lucide-react';
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
 
-  // Get user avatar URL with multiple fallbacks
-  const getUserAvatar = () => {
-    if (!session?.user?.email) return null;
-    
-    // Priority 1: Use Google profile image if available and valid
-    if (session.user.image && session.user.image.startsWith('http')) {
-      return session.user.image;
-    }
-    
-    // Priority 2: Generate consistent avatar based on email
-    return getEmailBasedAvatar(session.user.email, 32);
-  };
-
-  // Get fallback avatar for onError handler
-  const getFallbackAvatar = () => {
-    if (!session?.user?.email) return '/default-avatar.png';
-    
-    const initials = getInitialsFromEmail(session.user.email);
-    return `https://ui-avatars.com/api/?name=${initials}&size=32&background=3B82F6&color=ffffff&rounded=true`;
-  };
+  // Hide navbar on home page if user is not logged in
+  if (!session && pathname === '/') {
+    return null;
+  }
 
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <h1 className="text-xl font-bold text-gray-900">
+        <div className="flex justify-between items-center h-14">
+          {/* Simple Brand */}
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Package className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg font-semibold text-white hidden sm:block">
               Management Barang
-            </h1>
+            </span>
+            <span className="text-lg font-semibold text-white sm:hidden">
+              MB
+            </span>
           </div>
           
-          <div className="flex items-center space-x-4">
+          {/* Simple User Section */}
+          <div className="flex items-center space-x-3">
             {session?.user ? (
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
+              <>
+                {/* Simple User Info */}
+                <div className="flex items-center space-x-3 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
                   <img
-                    src={getUserAvatar() || getFallbackAvatar()}
-                    alt={session.user.name || session.user.email || 'User'}
-                    className="w-8 h-8 rounded-full border-2 border-gray-200 object-cover bg-gray-100"
-                    onError={(e) => {
-                      // Final fallback to initials avatar if all else fails
-                      const target = e.target as HTMLImageElement;
-                      target.src = getFallbackAvatar();
-                    }}
+                    src={session.user.image || `https://ui-avatars.com/api/?name=${session.user.name || 'User'}&size=32&background=3B82F6&color=ffffff&rounded=true`}
+                    alt={session.user.name || 'User'}
+                    className="w-7 h-7 rounded-full border border-slate-600"
                   />
-                  <span className="text-gray-700">{session.user.name || session.user.email}</span>
+                  <div className="hidden sm:block">
+                    <p className="text-sm font-medium text-white">
+                      {session.user.name?.split(' ')[0] || 'User'}
+                    </p>
+                  </div>
                 </div>
+                
+                {/* Simple Logout Button */}
                 <button
                   onClick={() => signOut()}
-                  className="flex items-center space-x-1 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
+                  title="Logout"
                 >
-                  <LogOut size={16} />
-                  <span>Logout</span>
+                  <LogOut size={18} />
                 </button>
-              </div>
+              </>
             ) : (
+              /* Simple Login Button */
               <button
                 onClick={() => signIn('google')}
-                className="flex items-center space-x-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
               >
-                <User size={16} />
-                <span>Login dengan Google</span>
+                <span className="hidden sm:inline">Sign In</span>
+                <span className="sm:hidden">Login</span>
               </button>
             )}
           </div>

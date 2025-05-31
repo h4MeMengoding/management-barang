@@ -49,10 +49,13 @@ export async function POST(request: NextRequest) {
       }
 
       // Generate QR code image
-      const qrCodeData = `qr:${code}`;
+      // Store just the code number for better scanner compatibility
+      const qrCodeData = `${code}`;
       const qrCodeBase64 = await QRCodeLib.toDataURL(qrCodeData, {
-        width: 300,
-        margin: 2,
+        width: 500, // Larger size for better scanning
+        margin: 6, // Increased margin for better scanning
+        errorCorrectionLevel: 'H', // High error correction for better reliability
+        scale: 8, // Increased scale for sharper QR
         color: {
           dark: '#000000',
           light: '#FFFFFF'

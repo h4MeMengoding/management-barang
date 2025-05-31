@@ -89,8 +89,8 @@ function EditLockerContent({ lockerId }: { lockerId: string }) {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="dark-theme min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -102,12 +102,12 @@ function EditLockerContent({ lockerId }: { lockerId: string }) {
 
   if (!locker) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="dark-theme min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Loker tidak ditemukan</h2>
+          <h2 className="text-2xl font-bold text-slate-100">Loker tidak ditemukan</h2>
           <button
             onClick={() => router.push('/')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="mt-4 dark-button-primary"
           >
             Kembali ke Dashboard
           </button>
@@ -117,32 +117,32 @@ function EditLockerContent({ lockerId }: { lockerId: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="dark-theme min-h-screen pt-16">
+      <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="dark-button flex items-center space-x-2 mb-6"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Loker</h1>
-          <p className="mt-2 text-gray-600">Ubah informasi loker</p>
+          <h1 className="text-3xl font-bold text-slate-100 mb-2">Edit Loker</h1>
+          <p className="text-slate-400">Ubah informasi loker</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Informasi Loker</h3>
-            <p className="text-sm text-gray-600">Kode: <span className="font-mono">{locker.code}</span></p>
-            <p className="text-xs text-gray-500 mt-1">
+        <div className="dark-card">
+          <div className="mb-6 p-4 bg-slate-700 rounded-lg">
+            <h3 className="text-sm font-medium text-slate-200 mb-2">Informasi Loker</h3>
+            <p className="text-sm text-slate-300">Kode: <span className="font-mono text-blue-400">{locker.code}</span></p>
+            <p className="text-xs text-slate-400 mt-1">
               Kode loker tidak dapat diubah setelah dibuat
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="label" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="label" className="block text-sm font-medium text-slate-200 mb-2">
                 Label Loker *
               </label>
               <input
@@ -152,13 +152,13 @@ function EditLockerContent({ lockerId }: { lockerId: string }) {
                 value={formData.label}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="dark-input"
                 placeholder="Masukkan label loker"
               />
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="description" className="block text-sm font-medium text-slate-200 mb-2">
                 Deskripsi (Opsional)
               </label>
               <textarea
@@ -167,7 +167,7 @@ function EditLockerContent({ lockerId }: { lockerId: string }) {
                 value={formData.description}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="dark-input resize-none"
                 placeholder="Masukkan deskripsi loker (opsional)"
               />
             </div>
@@ -176,14 +176,14 @@ function EditLockerContent({ lockerId }: { lockerId: string }) {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="dark-button"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="dark-button-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <Loader2 size={20} className="animate-spin" />
