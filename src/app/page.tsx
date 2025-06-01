@@ -327,12 +327,14 @@ export default function Home() {
               return (
                 <div key={locker._id} className="dark-card p-6 hover:scale-105 transition-all duration-300 group">
                   <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-100 group-hover:text-blue-400 transition-colors">
-                        {locker.label}
-                      </h3>
-                      <p className="text-sm text-gray-400">Kode: {locker.code}</p>
-                    </div>
+                    <Link href={`/lockers/${locker._id}`} className="flex-1 cursor-pointer">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-100 group-hover:text-blue-400 transition-colors hover:text-blue-400">
+                          {locker.label}
+                        </h3>
+                        <p className="text-sm text-gray-400">Kode: {locker.code}</p>
+                      </div>
+                    </Link>
                     <div className="relative" ref={dropdownRef}>
                       <button
                         onClick={() => setDropdownOpen(dropdownOpen === locker._id ? null : locker._id)}

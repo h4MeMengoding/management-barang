@@ -66,8 +66,7 @@ export default function QRCodesPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setQrCodes(prev => [...prev, ...data.qrCodes]);
-        showSuccess(`${data.qrCodes.length} QR codes berhasil dibuat!`);
+        showSuccess(`${data.qrCodes.length} QR codes berhasil dibuat! Lihat di menu "Kelola QR Codes" untuk melihat hasilnya.`);
       } else {
         const error = await response.json();
         showError(`Error: ${error.message}`);
@@ -80,7 +79,7 @@ export default function QRCodesPage() {
     }
   };
 
-  const printQRCodes = () => {
+  const printAllQRCodes = () => {
     window.print();
   };
 
@@ -205,6 +204,7 @@ export default function QRCodesPage() {
                 <h3 className="text-blue-300 font-medium mb-3">📋 Cara Penggunaan</h3>
                 <ol className="text-blue-200 text-sm space-y-2 list-decimal list-inside">
                   <li>Generate QR codes dalam batch (misalnya 10-50 QR codes sekaligus)</li>
+                  <li>Setelah generate, lihat hasilnya di menu &quot;Kelola QR Codes&quot;</li>
                   <li>Print dan tempel QR codes ke loker fisik</li>
                   <li>Gunakan fitur &quot;Scan QR Code&quot; untuk menginisialisasi loker baru</li>
                   <li>Setelah scan, Anda akan diminta untuk mengisi nama dan deskripsi loker</li>
@@ -248,35 +248,21 @@ export default function QRCodesPage() {
                     </>
                   )}
                 </button>
-              </div>
-
-              {qrCodes.length > 0 && (
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <h3 className="text-lg font-medium text-gray-200">
-                      QR Codes Generated ({qrCodes.length})
-                    </h3>
-                    <button
-                      onClick={printQRCodes}
-                      className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200"
-                    >
-                      <Printer size={16} />
-                      <span>Print All</span>
-                    </button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 print:grid-cols-4">
-                    {qrCodes.map((qr) => (
-                      <QRCodeDisplay
-                        key={qr._id}
-                        qrCode={qr}
-                        showDetails={false}
-                        printMode={false}
-                      />
-                    ))}
-                  </div>
+                
+                <div className="bg-green-900/20 border border-green-700/30 rounded-lg p-6">
+                  <h3 className="text-green-300 font-medium mb-3">✅ Setelah Generate</h3>
+                  <p className="text-green-200 text-sm mb-3">
+                    Setelah berhasil generate QR codes, silakan buka menu &quot;Kelola QR Codes&quot; untuk melihat, mencetak, dan mengelola QR codes yang telah dibuat.
+                  </p>
+                  <button
+                    onClick={() => setView('manage')}
+                    className="inline-flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200"
+                  >
+                    <Eye size={16} />
+                    <span>Lihat QR Codes</span>
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           )}
 
@@ -298,6 +284,15 @@ export default function QRCodesPage() {
                   Semua QR Codes ({qrCodes.length})
                 </h3>
                 <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={printAllQRCodes}
+                    disabled={loading || qrCodes.length === 0}
+                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Print semua QR codes"
+                  >
+                    <Printer size={16} />
+                    <span>Print All</span>
+                  </button>
                   <button
                     onClick={regenerateAllQRCodes}
                     disabled={loading || qrCodes.length === 0}
@@ -345,7 +340,7 @@ export default function QRCodesPage() {
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 print:grid-cols-4 print:gap-2">
                   {qrCodes.map((qr) => (
                     <div key={qr._id} className="relative">
                       <QRCodeDisplay
@@ -356,7 +351,7 @@ export default function QRCodesPage() {
                       {!qr.isUsed && (
                         <button
                           onClick={() => deleteQRCode(qr._id)}
-                          className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-all duration-200"
+                          className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-all duration-200 print:hidden"
                           title="Hapus QR Code"
                         >
                           <Trash2 size={16} />
