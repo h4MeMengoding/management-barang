@@ -3,6 +3,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { LogOut, Package } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -36,10 +37,12 @@ export default function Navbar() {
               <>
                 {/* Simple User Info */}
                 <div className="flex items-center space-x-3 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                  <img
+                  <Image
                     src={session.user.image || `https://ui-avatars.com/api/?name=${session.user.name || 'User'}&size=32&background=3B82F6&color=ffffff&rounded=true`}
                     alt={session.user.name || 'User'}
-                    className="w-7 h-7 rounded-full border border-slate-600"
+                    width={28}
+                    height={28}
+                    className="rounded-full border border-slate-600"
                   />
                   <div className="hidden sm:block">
                     <p className="text-sm font-medium text-white">

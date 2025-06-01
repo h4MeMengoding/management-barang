@@ -14,12 +14,17 @@ interface Locker {
   createdAt: string;
 }
 
-function EditLockerContent({ lockerId }: { lockerId: string }) {
+function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [locker, setLocker] = useState<Locker | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [lockerId, setLockerId] = useState<string>('');
+
+  useEffect(() => {
+    params.then(({ lockerId }) => setLockerId(lockerId));
+  }, [params]);
   const [formData, setFormData] = useState({
     label: '',
     description: '',
@@ -200,8 +205,6 @@ function EditLockerContent({ lockerId }: { lockerId: string }) {
   );
 }
 
-export default async function EditLocker({ params }: { params: Promise<{ lockerId: string }> }) {
-  const { lockerId } = await params;
-  
-  return <EditLockerContent lockerId={lockerId} />;
+export default function EditLocker({ params }: { params: Promise<{ lockerId: string }> }) {
+  return <EditLockerContent params={params} />;
 }

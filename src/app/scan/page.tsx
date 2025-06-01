@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, Camera, Upload, Package } from 'lucide-react';
+import Image from 'next/image';
 import jsQR from 'jsqr';
 
 interface ScanResult {
@@ -107,22 +108,24 @@ export default function QRScanner() {
           scanFromCamera();
         };
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setScanning(false);
       console.error('Camera error:', error);
       
-      if (error.name === 'NotAllowedError') {
+      const errorMessage = error instanceof Error ? error : new Error('Unknown camera error');
+      
+      if (errorMessage.name === 'NotAllowedError') {
         setError('Akses kamera ditolak. Silakan:\n1. Klik ikon kamera di address bar browser\n2. Pilih "Allow" untuk mengizinkan akses kamera\n3. Refresh halaman dan coba lagi');
-      } else if (error.name === 'NotFoundError') {
+      } else if (errorMessage.name === 'NotFoundError') {
         setError('Kamera tidak ditemukan. Pastikan perangkat memiliki kamera yang terhubung.');
-      } else if (error.name === 'NotReadableError') {
+      } else if (errorMessage.name === 'NotReadableError') {
         setError('Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi lain yang menggunakan kamera dan coba lagi.');
-      } else if (error.name === 'OverconstrainedError') {
+      } else if (errorMessage.name === 'OverconstrainedError') {
         setError('Pengaturan kamera tidak didukung oleh perangkat.');
-      } else if (error.name === 'SecurityError') {
+      } else if (errorMessage.name === 'SecurityError') {
         setError('Akses kamera diblokir karena alasan keamanan. Pastikan halaman diakses melalui HTTPS atau localhost.');
       } else {
-        setError(error.message || 'Tidak dapat mengakses kamera. Pastikan memberikan izin akses kamera dan coba lagi.');
+        setError(errorMessage.message || 'Tidak dapat mengakses kamera. Pastikan memberikan izin akses kamera dan coba lagi.');
       }
     }
   };
@@ -191,16 +194,16 @@ export default function QRScanner() {
       
       const reader = new FileReader();
       reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
+        const htmlImg = new window.Image();
+        htmlImg.onload = () => {
           const canvas = canvasRef.current;
           if (canvas) {
             const context = canvas.getContext('2d');
             if (context) {
               // Set canvas size to match image
-              canvas.width = img.width;
-              canvas.height = img.height;
-              context.drawImage(img, 0, 0);
+              canvas.width = htmlImg.width;
+              canvas.height = htmlImg.height;
+              context.drawImage(htmlImg, 0, 0);
               
               try {
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -223,7 +226,7 @@ export default function QRScanner() {
             }
           }
         };
-        img.src = e.target?.result as string;
+        htmlImg.src = e.target?.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -347,10 +350,12 @@ export default function QRScanner() {
                   <p className="text-gray-400 mt-2">{scanResult.locker.description}</p>
                 )}
               </div>
-              <img 
+              <Image 
                 src={scanResult.locker.qrCode} 
                 alt="QR Code"
-                className="w-16 h-16 rounded-lg border border-gray-600"
+                width={64}
+                height={64}
+                className="rounded-lg border border-gray-600"
               />
             </div>
           </div>
@@ -416,7 +421,7 @@ export default function QRScanner() {
                 <p className="text-red-200 text-sm mb-3">Langkah-langkah untuk mengizinkan akses kamera:</p>
                 <ol className="text-red-200 text-sm space-y-1 list-decimal list-inside">
                   <li>Klik ikon kunci/kamera di address bar browser</li>
-                  <li>Pilih "Allow" atau "Izinkan" untuk kamera</li>
+                  <li>Pilih &quot;Allow&quot; atau &quot;Izinkan&quot; untuk kamera</li>
                   <li>Refresh halaman dan coba lagi</li>
                 </ol>
                 <button

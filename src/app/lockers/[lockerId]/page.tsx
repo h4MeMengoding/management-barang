@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, Package, Plus, QrCode, Download, Edit2, Trash2, Settings } from 'lucide-react';
+import Image from 'next/image';
 
 interface Locker {
   _id: string;
@@ -233,10 +234,12 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
           <div className="dark-card">
             <h2 className="text-lg font-semibold text-slate-100 mb-4">QR Code</h2>
             <div className="text-center">
-              <img 
+              <Image 
                 src={locker.qrCode} 
                 alt="QR Code"
-                className="w-48 h-48 mx-auto mb-4 border border-slate-600 rounded"
+                width={192}
+                height={192}
+                className="mx-auto mb-4 border border-slate-600 rounded"
               />
               <div className="space-y-2">
                 <button

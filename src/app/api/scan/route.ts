@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     console.log('Scan API received QR data:', qrData);
 
     // Cleanup the data by trimming whitespace
-    let cleanQrData = qrData.trim();
+    const cleanQrData = qrData.trim();
     let qrCodeValue = cleanQrData;
 
     // Handle different formats: qrcode:CODE, just the CODE itself, etc.

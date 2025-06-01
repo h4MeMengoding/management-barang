@@ -4,6 +4,7 @@ import { useSession, signIn } from 'next-auth/react';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Plus, Package, QrCode, Search, Eye, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import Image from 'next/image';
 
 interface Locker {
   _id: string;
@@ -370,10 +371,12 @@ export default function Home() {
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="dark-icon p-2 group-hover:scale-110 transition-transform duration-200">
-                        <img 
+                        <Image 
                           src={locker.qrCode} 
                           alt="QR Code"
-                          className="w-6 h-6 rounded"
+                          width={24}
+                          height={24}
+                          className="rounded"
                         />
                       </div>
                     </div>
