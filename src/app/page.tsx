@@ -21,7 +21,7 @@ interface Item {
   description?: string;
   category: string;
   quantity: number;
-  lockerId: string;
+  lockerId: string | { _id: string; code: string; label: string };
   createdAt: string;
 }
 
@@ -77,7 +77,12 @@ export default function Home() {
   };
 
   const getItemsForLocker = (lockerId: string) => {
-    return items.filter(item => item.lockerId === lockerId);
+    return items.filter(item => {
+      const itemLockerId = typeof item.lockerId === 'string' 
+        ? item.lockerId 
+        : item.lockerId._id;
+      return itemLockerId === lockerId;
+    });
   };
 
   const deleteLocker = async (lockerId: string) => {

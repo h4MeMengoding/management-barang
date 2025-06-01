@@ -162,8 +162,11 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
 
   if (status === 'loading' || loading) {
     return (
-      <div className="dark-theme min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen flex items-center justify-center dark-theme">
+        <div className="dark-card p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-400 text-center">Memuat...</p>
+        </div>
       </div>
     );
   }
@@ -175,12 +178,13 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
 
   if (!locker) {
     return (
-      <div className="dark-theme min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-100">Loker tidak ditemukan</h2>
+      <div className="min-h-screen flex items-center justify-center dark-theme">
+        <div className="dark-card p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-200 mb-4">Loker tidak ditemukan</h2>
+          <p className="text-gray-400 mb-6">Loker yang Anda cari tidak ditemukan atau telah dihapus.</p>
           <button
             onClick={() => router.push('/')}
-            className="mt-4 dark-button-primary"
+            className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200"
           >
             Kembali ke Dashboard
           </button>
@@ -190,28 +194,28 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
   }
 
   return (
-    <div className="dark-theme min-h-screen pt-16">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen dark-theme pt-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="dark-button flex items-center space-x-2 mb-6"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
           </button>
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-100">{locker.label}</h1>
-              <p className="mt-2 text-slate-300">Kode: <span className="font-mono text-blue-400">{locker.code}</span></p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-100 mb-2">{locker.label}</h1>
+              <p className="text-gray-400">Kode: <span className="font-mono text-blue-400">{locker.code}</span></p>
               {locker.description && (
-                <p className="mt-1 text-slate-400">{locker.description}</p>
+                <p className="mt-1 text-gray-400">{locker.description}</p>
               )}
             </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => router.push(`/lockers/${lockerId}/edit`)}
-                className="dark-button flex items-center space-x-2"
+                className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200"
                 title="Edit loker"
               >
                 <Settings size={16} />
@@ -219,7 +223,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
               </button>
               <button
                 onClick={deleteLocker}
-                className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2"
+                className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200"
                 title="Hapus loker"
               >
                 <Trash2 size={16} />
@@ -229,29 +233,29 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* QR Code Section */}
-          <div className="dark-card">
-            <h2 className="text-lg font-semibold text-slate-100 mb-4">QR Code</h2>
+          <div className="dark-card p-6">
+            <h2 className="text-lg font-semibold text-gray-200 mb-6">QR Code</h2>
             <div className="text-center">
               <Image 
                 src={locker.qrCode} 
                 alt="QR Code"
                 width={192}
                 height={192}
-                className="mx-auto mb-4 border border-slate-600 rounded"
+                className="mx-auto mb-6 border border-gray-600 rounded-lg"
               />
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <button
                   onClick={downloadQRCode}
-                  className="dark-button-primary w-full flex items-center justify-center space-x-2"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 dark-button text-blue-400 hover:text-blue-300 font-medium transition-all duration-200"
                 >
                   <Download size={16} />
                   <span>Download</span>
                 </button>
                 <button
                   onClick={printQRCode}
-                  className="dark-button w-full flex items-center justify-center space-x-2"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200"
                 >
                   <QrCode size={16} />
                   <span>Print</span>
@@ -262,52 +266,52 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
 
           {/* Items Section */}
           <div className="lg:col-span-2">
-            <div className="dark-card">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-slate-100">
+            <div className="dark-card p-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+                <h2 className="text-lg font-semibold text-gray-200">
                   Daftar Barang ({items.length})
                 </h2>
-                <a
-                  href="/items/new"
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+                <button
+                  onClick={() => router.push('/items/new')}
+                  className="flex items-center space-x-2 px-4 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200"
                 >
                   <Plus size={20} />
                   <span>Tambah Barang</span>
-                </a>
+                </button>
               </div>
 
               {items.length === 0 ? (
                 <div className="text-center py-12">
-                  <Package className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-                  <h3 className="text-lg font-medium text-slate-100 mb-2">Belum ada barang</h3>
-                  <p className="text-slate-400 mb-4">Loker ini belum memiliki barang. Mulai tambahkan barang pertama.</p>
-                  <a
-                    href="/items/new"
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors inline-flex items-center space-x-2"
+                  <Package className="mx-auto h-16 w-16 text-gray-500 mb-6" />
+                  <h3 className="text-xl font-medium text-gray-200 mb-2">Belum ada barang</h3>
+                  <p className="text-gray-400 mb-6">Loker ini belum memiliki barang. Mulai tambahkan barang pertama.</p>
+                  <button
+                    onClick={() => router.push('/items/new')}
+                    className="inline-flex items-center space-x-2 px-6 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200"
                   >
                     <Plus size={20} />
                     <span>Tambah Barang</span>
-                  </a>
+                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {items.map((item) => (
-                    <div key={item._id} className="border border-slate-600 bg-slate-700 rounded-lg p-4 hover:bg-slate-600 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium text-slate-100">{item.name}</h3>
+                    <div key={item._id} className="border border-gray-600 bg-gray-700/50 rounded-lg p-4 hover:bg-gray-700/70 transition-all duration-200">
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="font-medium text-gray-200">{item.name}</h3>
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm text-slate-300">×{item.quantity}</span>
+                          <span className="text-sm text-gray-300 bg-gray-600/50 px-2 py-1 rounded">×{item.quantity}</span>
                           <div className="flex space-x-1">
                             <button
                               onClick={() => router.push(`/items/${item._id}/edit`)}
-                              className="p-1 text-slate-400 hover:text-blue-400 transition-colors"
+                              className="p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200"
                               title="Edit barang"
                             >
                               <Edit2 size={14} />
                             </button>
                             <button
                               onClick={() => deleteItem(item._id)}
-                              className="p-1 text-slate-400 hover:text-red-400 transition-colors"
+                              className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200"
                               title="Hapus barang"
                             >
                               <Trash2 size={14} />
@@ -315,11 +319,13 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
                           </div>
                         </div>
                       </div>
-                      <p className="text-sm text-slate-300 mb-1">Kategori: {item.category}</p>
+                      <p className="text-sm text-gray-300 mb-2">
+                        <span className="text-gray-400">Kategori:</span> {item.category}
+                      </p>
                       {item.description && (
-                        <p className="text-sm text-slate-400">{item.description}</p>
+                        <p className="text-sm text-gray-400 mb-3">{item.description}</p>
                       )}
-                      <p className="text-xs text-slate-500 mt-2">
+                      <p className="text-xs text-gray-500">
                         Ditambahkan: {new Date(item.createdAt).toLocaleDateString('id-ID')}
                       </p>
                     </div>

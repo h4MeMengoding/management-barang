@@ -202,16 +202,16 @@ export default function QRCodesPage() {
                 </ol>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label htmlFor="batchSize" className="block text-sm font-medium text-gray-200 mb-2">
+                  <label htmlFor="batchSize" className="block text-sm font-medium text-gray-300 mb-3">
                     Jumlah QR Code yang akan dibuat
                   </label>
                   <select
                     id="batchSize"
                     value={batchSize}
                     onChange={(e) => setBatchSize(Number(e.target.value))}
-                    className="dark-input w-full text-gray-200"
+                    className="w-full dark-input text-gray-200"
                   >
                     <option value={5}>5 QR Codes</option>
                     <option value={10}>10 QR Codes</option>
@@ -224,7 +224,7 @@ export default function QRCodesPage() {
                 <button
                   onClick={generateQRCodes}
                   disabled={loading}
-                  className="w-full dark-button-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>
@@ -241,14 +241,14 @@ export default function QRCodesPage() {
               </div>
 
               {qrCodes.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <h3 className="text-lg font-medium text-gray-200">
                       QR Codes Generated ({qrCodes.length})
                     </h3>
                     <button
                       onClick={printQRCodes}
-                      className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100"
+                      className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200"
                     >
                       <Printer size={16} />
                       <span>Print All</span>
@@ -283,15 +283,15 @@ export default function QRCodesPage() {
                 </div>
               </div>
               
-              <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <h3 className="text-lg font-medium text-gray-200">
                   Semua QR Codes ({qrCodes.length})
                 </h3>
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-3">
                   <button
                     onClick={regenerateAllQRCodes}
                     disabled={loading || qrCodes.length === 0}
-                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Regenerasi semua QR codes dengan angka di tengah"
                   >
                     {loading ? (
@@ -304,7 +304,7 @@ export default function QRCodesPage() {
                   <button
                     onClick={loadExistingQRCodes}
                     disabled={loading}
-                    className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 disabled:opacity-50"
+                    className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200 disabled:opacity-50"
                   >
                     {loading ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
@@ -328,7 +328,7 @@ export default function QRCodesPage() {
                   <p className="text-gray-400 mb-6">Generate QR codes terlebih dahulu untuk memulai.</p>
                   <button
                     onClick={() => setView('generate')}
-                    className="inline-flex items-center space-x-2 px-6 py-3 dark-button-primary text-white"
+                    className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200"
                   >
                     <QrCode size={18} />
                     <span>Generate QR Codes</span>
@@ -346,7 +346,7 @@ export default function QRCodesPage() {
                       {!qr.isUsed && (
                         <button
                           onClick={() => deleteQRCode(qr._id)}
-                          className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-colors"
+                          className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-all duration-200"
                           title="Hapus QR Code"
                         >
                           <Trash2 size={16} />

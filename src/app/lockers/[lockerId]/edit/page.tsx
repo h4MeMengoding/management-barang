@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 
 interface Locker {
   _id: string;
@@ -31,16 +31,31 @@ function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }
   });
 
   const fetchLockerData = useCallback(async () => {
+    if (!lockerId) return;
+    
     try {
+      console.log('Fetching locker data for ID:', lockerId);
       const response = await fetch(`/api/lockers/${lockerId}`);
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
-        setLocker(data.locker);
-        setFormData({
-          label: data.locker.label,
-          description: data.locker.description || '',
-        });
+        console.log('Response data:', data);
+        
+        if (data.locker) {
+          setLocker(data.locker);
+          setFormData({
+            label: data.locker.label || '',
+            description: data.locker.description || '',
+          });
+        } else {
+          console.error('Locker data not found in response');
+          router.push('/');
+        }
       } else {
+        console.error('Failed to fetch locker:', response.status);
+        const errorData = await response.json();
+        console.error('Error data:', errorData);
         router.push('/');
       }
     } catch (error) {
@@ -52,7 +67,7 @@ function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }
   }, [lockerId, router]);
 
   useEffect(() => {
-    if (session) {
+    if (session && lockerId) {
       fetchLockerData();
     }
   }, [session, lockerId, fetchLockerData]);
@@ -122,32 +137,41 @@ function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }
   }
 
   return (
-    <div className="dark-theme min-h-screen pt-16">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="min-h-screen dark-theme pt-16">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="dark-button flex items-center space-x-2 mb-6"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
           </button>
-          <h1 className="text-3xl font-bold text-slate-100 mb-2">Edit Loker</h1>
-          <p className="text-slate-400">Ubah informasi loker</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-100 mb-2">Edit Loker</h1>
+          <p className="text-gray-400">Ubah informasi loker yang sudah ada</p>
         </div>
 
-        <div className="dark-card">
-          <div className="mb-6 p-4 bg-slate-700 rounded-lg">
-            <h3 className="text-sm font-medium text-slate-200 mb-2">Informasi Loker</h3>
-            <p className="text-sm text-slate-300">Kode: <span className="font-mono text-blue-400">{locker.code}</span></p>
-            <p className="text-xs text-slate-400 mt-1">
-              Kode loker tidak dapat diubah setelah dibuat
-            </p>
+        <div className="dark-card p-8">
+          <div className="mb-8 p-6 bg-blue-900/20 border border-blue-700/30 rounded-lg">
+            <h3 className="text-blue-300 font-medium mb-3">📋 Informasi Loker</h3>
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-blue-900/30 border-2 border-blue-600/50 rounded-lg flex items-center justify-center">
+                <span className="text-blue-300 font-bold text-lg">{locker.code}</span>
+              </div>
+              <div>
+                <p className="text-sm text-blue-200">
+                  <span className="font-semibold">Kode:</span> {locker.code}
+                </p>
+                <p className="text-xs text-blue-300 mt-1">
+                  Kode loker tidak dapat diubah setelah dibuat
+                </p>
+              </div>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <label htmlFor="label" className="block text-sm font-medium text-slate-200 mb-2">
+              <label htmlFor="label" className="block text-sm font-medium text-gray-300 mb-3">
                 Label Loker *
               </label>
               <input
@@ -157,45 +181,52 @@ function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }
                 value={formData.label}
                 onChange={handleChange}
                 required
-                className="dark-input"
-                placeholder="Masukkan label loker"
+                className="w-full dark-input text-gray-200 placeholder-gray-500"
+                placeholder="Contoh: Loker Elektronik Kantor"
               />
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-slate-200 mb-2">
-                Deskripsi (Opsional)
+              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-3">
+                Deskripsi Loker
               </label>
               <textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                rows={3}
-                className="dark-input resize-none"
-                placeholder="Masukkan deskripsi loker (opsional)"
+                rows={4}
+                className="w-full dark-input text-gray-200 placeholder-gray-500 resize-none"
+                placeholder="Deskripsi tambahan tentang loker (opsional)"
               />
             </div>
 
-            <div className="flex justify-end space-x-4">
+            <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-lg p-6">
+              <h3 className="text-sm font-semibold text-yellow-300 mb-3">
+                💡 Informasi Penting:
+              </h3>
+              <ul className="text-sm text-yellow-200 space-y-2">
+                <li>• Kode loker tidak dapat diubah setelah dibuat</li>
+                <li>• Perubahan akan diterapkan ke semua barang dalam loker ini</li>
+                <li>• QR code akan tetap sama setelah edit</li>
+              </ul>
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-6">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="dark-button"
+                className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200 font-medium"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="dark-button-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 px-6 py-3 dark-button text-blue-400 hover:text-blue-300 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? (
-                  <Loader2 size={20} className="animate-spin" />
-                ) : (
-                  <Save size={20} />
-                )}
-                <span>{submitting ? 'Menyimpan...' : 'Simpan'}</span>
+                <Save size={20} />
+                <span>{submitting ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
               </button>
             </div>
           </form>
