@@ -10,7 +10,7 @@ interface QRCode {
   code: string;
   qrCode: string;
   isUsed: boolean;
-  lockerId?: string;
+  lockerId?: string | { _id: string; label: string };
   createdAt: string;
 }
 
@@ -129,7 +129,9 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
             {qrCode.lockerId && (
               <div className="text-center p-2 sm:p-3 bg-green-900/20 text-green-400 rounded-lg border border-green-500/30">
                 <span className="text-xs sm:text-sm block mb-1">Terhubung dengan</span>
-                <span className="text-sm sm:text-base font-medium break-words">Loker: {qrCode.lockerId}</span>
+                <span className="text-sm sm:text-base font-medium break-words">
+                  Loker: {typeof qrCode.lockerId === 'object' ? String(qrCode.lockerId.label) : String(qrCode.lockerId)}
+                </span>
               </div>
             )}
 
@@ -225,7 +227,7 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
               
               {qrCode.lockerId && (
                 <div className="text-xs text-green-400 text-center mt-2 p-2 bg-green-900/20 rounded-lg border border-green-500/30">
-                  Terhubung dengan Loker: {qrCode.lockerId}
+                  Terhubung dengan Loker: {typeof qrCode.lockerId === 'object' ? String(qrCode.lockerId.label) : String(qrCode.lockerId)}
                 </div>
               )}
             </div>
