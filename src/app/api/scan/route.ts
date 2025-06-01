@@ -77,7 +77,6 @@ export async function POST(request: NextRequest) {
         qrCode: {
           _id: qrCode._id,
           code: qrCode.code,
-          qrCodeImage: qrCode.qrCode,
         },
       });
     }

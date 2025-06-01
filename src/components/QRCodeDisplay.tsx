@@ -65,46 +65,46 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
       </button>
 
       {/* Modal Content Container */}
-      <div className="w-full max-w-6xl mx-auto my-auto flex flex-col items-center justify-center min-h-full py-16 sm:py-20 px-4 sm:px-6">
+      <div className="w-full max-w-3xl mx-auto my-auto flex flex-col items-center justify-center min-h-full py-6 sm:py-8 px-4 sm:px-6">
         {/* QR Code Title */}
-        <div className="text-center mb-4 sm:mb-6 px-2 sm:px-4 max-w-full">
-          <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white mb-2 break-words leading-tight">
+        <div className="text-center mb-2 sm:mb-3 px-2 sm:px-4 max-w-full">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-white mb-1 break-words leading-tight">
             QR Code Detail
           </h3>
-          <p className="font-mono text-base sm:text-lg md:text-xl text-gray-300 break-all px-2">
+          <p className="font-mono text-sm sm:text-base md:text-lg text-gray-300 break-all px-2">
             {qrCode.code}
           </p>
         </div>
       
         {/* Full Screen QR Code */}
         <div 
-          className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-2xl max-w-[95vw] sm:max-w-[90vw] max-h-[60vh] sm:max-h-[70vh] flex items-center justify-center mx-4"
+          className="bg-white p-3 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl shadow-2xl max-w-[85vw] sm:max-w-[70vw] max-h-[55vh] sm:max-h-[60vh] flex items-center justify-center mx-4"
           onClick={(e) => e.stopPropagation()}
         >
           <Image
             src={qrCode.qrCode}
             alt={`QR Code ${qrCode.code}`}
-            width={600}
-            height={600}
+            width={450}
+            height={450}
             className="mx-auto block max-w-full max-h-full object-contain"
             style={{ 
-              minWidth: '250px', 
-              minHeight: '250px',
-              maxWidth: '85vw',
-              maxHeight: '55vh'
+              minWidth: '200px', 
+              minHeight: '200px',
+              maxWidth: '75vw',
+              maxHeight: '50vh'
             }}
           />
         </div>
 
         {/* QR Code Details */}
-        <div className="mt-4 sm:mt-6 bg-slate-800/80 backdrop-blur-md border border-slate-600/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-full sm:max-w-md w-full mx-4">
-          <div className="space-y-3 sm:space-y-4">
+        <div className="mt-2 sm:mt-3 bg-slate-800/80 backdrop-blur-md border border-slate-600/50 rounded-lg sm:rounded-xl p-3 sm:p-4 max-w-full sm:max-w-md w-full mx-4">
+          <div className="space-y-2 sm:space-y-3">
             {/* Status indicator */}
-            <div className="flex items-center justify-center space-x-2 sm:space-x-3">
-              <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full ${
+            <div className="flex items-center justify-center space-x-2">
+              <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${
                 qrCode.isUsed ? 'bg-green-500' : 'bg-gray-400'
               }`}></div>
-              <span className={`text-base sm:text-lg font-medium ${
+              <span className={`text-sm sm:text-base font-medium ${
                 qrCode.isUsed ? 'text-green-400' : 'text-gray-300'
               }`}>
                 {qrCode.isUsed ? 'Sudah Digunakan' : 'Belum Digunakan'}
@@ -112,9 +112,9 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
             </div>
 
             {/* Creation date */}
-            <div className="text-center border-t border-slate-600/30 pt-3 sm:pt-4">
-              <span className="text-xs sm:text-sm text-gray-400 block mb-1">Dibuat pada</span>
-              <span className="text-sm sm:text-base text-gray-300 break-words">
+            <div className="text-center border-t border-slate-600/30 pt-2 sm:pt-3">
+              <span className="text-xs text-gray-400 block mb-1">Dibuat pada</span>
+              <span className="text-xs sm:text-sm text-gray-300 break-words">
                 {new Date(qrCode.createdAt).toLocaleDateString('id-ID', {
                   day: '2-digit',
                   month: 'long',
@@ -127,24 +127,24 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
 
             {/* Locker connection info */}
             {qrCode.lockerId && (
-              <div className="text-center p-2 sm:p-3 bg-green-900/20 text-green-400 rounded-lg border border-green-500/30">
-                <span className="text-xs sm:text-sm block mb-1">Terhubung dengan</span>
-                <span className="text-sm sm:text-base font-medium break-words">
+              <div className="text-center p-2 bg-green-900/20 text-green-400 rounded-lg border border-green-500/30">
+                <span className="text-xs block mb-1">Terhubung dengan</span>
+                <span className="text-xs sm:text-sm font-medium break-words">
                   Loker: {typeof qrCode.lockerId === 'object' ? String(qrCode.lockerId.label) : String(qrCode.lockerId)}
                 </span>
               </div>
             )}
 
             {/* QR Code ID */}
-            <div className="text-center text-xs text-gray-500 border-t border-slate-600/30 pt-3 sm:pt-4 break-all">
+            <div className="text-center text-xs text-gray-500 border-t border-slate-600/30 pt-2 break-all">
               ID: {qrCode._id}
             </div>
           </div>
         </div>
 
         {/* Instructions */}
-        <div className="mt-6 sm:mt-8 text-center px-4 max-w-full">
-          <p className="text-gray-400 text-xs sm:text-sm break-words">
+        <div className="mt-3 sm:mt-4 text-center px-4 max-w-full">
+          <p className="text-gray-400 text-xs break-words">
             Klik di area gelap atau tekan ESC untuk menutup
           </p>
         </div>

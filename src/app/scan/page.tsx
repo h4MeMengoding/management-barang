@@ -266,7 +266,6 @@ export default function QRScanner() {
           const params = new URLSearchParams({
             qrCodeId: result.qrCode._id,
             code: result.qrCode.code,
-            qrCodeImage: result.qrCode.qrCodeImage,
           });
           router.push(`/lockers/initialize?${params.toString()}`);
         } else if (result.type === 'existing_locker') {

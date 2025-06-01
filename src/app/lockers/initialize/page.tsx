@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { ArrowLeft, Save, QrCode } from 'lucide-react';
 
 function InitializeLockerContent() {
   const searchParams = useSearchParams();
@@ -10,7 +10,6 @@ function InitializeLockerContent() {
   
   const qrCodeId = searchParams.get('qrCodeId');
   const code = searchParams.get('code');
-  const qrCodeImage = searchParams.get('qrCodeImage');
 
   const [formData, setFormData] = useState({
     label: '',
@@ -56,17 +55,18 @@ function InitializeLockerContent() {
     }
   };
 
-  if (!qrCodeId || !code || !qrCodeImage) {
+  if (!qrCodeId || !code) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h1 className="text-xl font-bold text-red-600 mb-4">Data Tidak Valid</h1>
-          <p className="text-gray-600 mb-4">
+      <div className="min-h-screen dark-theme flex items-center justify-center pt-16">
+        <div className="dark-card p-8 text-center max-w-md mx-auto">
+          <QrCode className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-red-400 mb-4">Data Tidak Valid</h1>
+          <p className="text-gray-400 mb-6">
             Parameter yang diperlukan untuk inisiasi loker tidak lengkap.
           </p>
           <button
             onClick={() => router.push('/scan')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="px-6 py-3 dark-button-primary text-white font-medium transition-all duration-200"
           >
             Kembali ke Scan
           </button>
@@ -76,39 +76,48 @@ function InitializeLockerContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">
+    <div className="min-h-screen dark-theme pt-16">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
+          >
+            <ArrowLeft size={20} />
+            <span>Kembali</span>
+          </button>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-100 mb-2">
             Inisiasi Loker Baru
           </h1>
+          <p className="text-gray-400">
+            Buat loker baru menggunakan QR code yang sudah dipindai
+          </p>
+        </div>
 
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h2 className="text-lg font-semibold text-blue-900 mb-2">
+        <div className="dark-card p-8">
+          <div className="mb-8 p-6 bg-blue-900/20 border border-blue-700/30 rounded-lg">
+            <h2 className="text-lg font-semibold text-blue-300 mb-4 flex items-center">
+              <QrCode className="mr-2" size={20} />
               QR Code yang Dipindai
             </h2>
             <div className="flex items-center space-x-4">
-              <Image
-                src={qrCodeImage}
-                alt={`QR Code ${code}`}
-                width={80}
-                height={80}
-                className="border border-gray-300 rounded"
-              />
+              <div className="w-20 h-20 bg-blue-900/30 border-2 border-blue-600/50 rounded-lg flex items-center justify-center">
+                <span className="text-blue-300 font-bold text-lg">{code}</span>
+              </div>
               <div>
-                <p className="text-sm text-blue-800">
+                <p className="text-sm text-blue-200">
                   <span className="font-semibold">Kode:</span> {code}
                 </p>
-                <p className="text-xs text-blue-600 mt-1">
+                <p className="text-xs text-blue-300 mt-1">
                   QR Code ini akan digunakan untuk loker baru
                 </p>
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <label htmlFor="label" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="label" className="block text-sm font-medium text-gray-300 mb-3">
                 Nama Loker *
               </label>
               <input
@@ -117,13 +126,13 @@ function InitializeLockerContent() {
                 value={formData.label}
                 onChange={(e) => setFormData(prev => ({ ...prev, label: e.target.value }))}
                 placeholder="Contoh: Loker Elektronik Kantor"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full dark-input text-gray-200 placeholder-gray-500"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-3">
                 Deskripsi Loker
               </label>
               <textarea
@@ -131,36 +140,37 @@ function InitializeLockerContent() {
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Deskripsi opsional untuk loker ini..."
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={4}
+                className="w-full dark-input text-gray-200 placeholder-gray-500 resize-none"
               />
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-yellow-800 mb-2">
-                Informasi Penting:
+            <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-lg p-6">
+              <h3 className="text-sm font-semibold text-yellow-300 mb-3">
+                💡 Informasi Penting:
               </h3>
-              <ul className="text-sm text-yellow-700 space-y-1">
+              <ul className="text-sm text-yellow-200 space-y-2">
                 <li>• QR Code ini akan dipasangkan dengan loker baru</li>
                 <li>• Setelah diinisiasi, QR Code tidak dapat digunakan lagi untuk loker lain</li>
                 <li>• Anda dapat menambahkan items ke loker setelah inisiasi</li>
               </ul>
             </div>
 
-            <div className="flex space-x-4">
+            <div className="flex justify-end space-x-4 pt-6">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 font-medium"
+                className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200 font-medium"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium"
+                className="flex items-center space-x-2 px-6 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Menginisiasi...' : 'Inisiasi Loker'}
+                <Save size={20} />
+                <span>{loading ? 'Menginisiasi...' : 'Inisiasi Loker'}</span>
               </button>
             </div>
           </form>
@@ -173,10 +183,11 @@ function InitializeLockerContent() {
 export default function InitializeLockerPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h1 className="text-2xl font-bold text-center mb-6">Loading...</h1>
+      <div className="min-h-screen dark-theme pt-16">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="dark-card p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-gray-400 text-center">Memuat...</p>
           </div>
         </div>
       </div>

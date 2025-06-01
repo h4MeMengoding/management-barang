@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, QrCode, Printer, Eye, Trash2 } from 'lucide-react';
+import { ArrowLeft, QrCode, Printer, Eye, Trash2, RefreshCw } from 'lucide-react';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
 
 interface QRCode {
@@ -81,6 +81,36 @@ export default function QRCodesPage() {
 
   const printQRCodes = () => {
     window.print();
+  };
+
+  const regenerateAllQRCodes = async () => {
+    if (!session) return;
+    
+    if (!confirm('Apakah Anda yakin ingin meregenerasi semua QR codes? Ini akan memperbarui semua QR codes dengan tampilan angka loker di tengah.')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/qrcodes/regenerate', {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`${data.qrCodes.length} QR codes berhasil diregenerasi dengan angka di tengah!`);
+        // Reload the QR codes to show updated versions
+        await loadExistingQRCodes();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Error regenerating QR codes:', error);
+      alert('Terjadi kesalahan saat meregenerasi QR codes');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteQRCode = async (qrCodeId: string) => {
@@ -168,6 +198,7 @@ export default function QRCodesPage() {
                   <li>Print dan tempel QR codes ke loker fisik</li>
                   <li>Gunakan fitur &quot;Scan QR Code&quot; untuk menginisialisasi loker baru</li>
                   <li>Setelah scan, Anda akan diminta untuk mengisi nama dan deskripsi loker</li>
+                  <li>QR codes yang baru dibuat sudah dilengkapi dengan angka loker di tengah untuk memudahkan identifikasi manual</li>
                 </ol>
               </div>
               
@@ -241,22 +272,48 @@ export default function QRCodesPage() {
 
           {view === 'manage' && (
             <div className="space-y-6">
+              <div className="bg-green-900/20 border border-green-700/30 rounded-lg p-6">
+                <h3 className="text-green-300 font-medium mb-3">✨ QR Codes dengan Angka Loker</h3>
+                <p className="text-green-200 text-sm mb-3">
+                  QR codes yang baru dibuat sudah dilengkapi dengan angka loker di tengah untuk memudahkan identifikasi manual. 
+                  Jika QR codes lama tidak memiliki angka di tengah, gunakan tombol &quot;Update QR Codes&quot; untuk memperbarui semua QR codes.
+                </p>
+                <div className="text-green-200 text-xs">
+                  💡 Fitur ini memungkinkan Anda menemukan loker secara manual tanpa perlu scan QR code
+                </div>
+              </div>
+              
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-200">
                   Semua QR Codes ({qrCodes.length})
                 </h3>
-                <button
-                  onClick={loadExistingQRCodes}
-                  disabled={loading}
-                  className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                  ) : (
-                    <Eye size={16} />
-                  )}
-                  <span>Refresh</span>
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={regenerateAllQRCodes}
+                    disabled={loading || qrCodes.length === 0}
+                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Regenerasi semua QR codes dengan angka di tengah"
+                  >
+                    {loading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                    ) : (
+                      <RefreshCw size={16} />
+                    )}
+                    <span>Update QR Codes</span>
+                  </button>
+                  <button
+                    onClick={loadExistingQRCodes}
+                    disabled={loading}
+                    className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                    ) : (
+                      <Eye size={16} />
+                    )}
+                    <span>Refresh</span>
+                  </button>
+                </div>
               </div>
 
               {loading ? (
