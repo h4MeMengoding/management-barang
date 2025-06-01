@@ -26,41 +26,34 @@ export async function generateQRCodeWithOverlay(code: string): Promise<string> {
     // Add white circle background for text
     const centerX = 300;
     const centerY = 300;
-    const circleRadius = 55; // Slightly larger circle for better visibility
+    const circleRadius = 60; // Larger radius for better text fit
     
-    // Add subtle shadow for better contrast
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-    
+    // Draw white circle background
     ctx.fillStyle = '#FFFFFF';
     ctx.beginPath();
     ctx.arc(centerX, centerY, circleRadius, 0, 2 * Math.PI);
     ctx.fill();
     
-    // Reset shadow
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    
-    // Add border to circle
+    // Add thick black border to circle
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, circleRadius, 0, 2 * Math.PI);
     ctx.stroke();
     
-    // Add text (code number) with better typography
+    // Add text - using standard fonts available in most systems
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 42px Arial, sans-serif';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    
+    // Set font - use system default sans-serif which should always work
+    ctx.font = 'bold 36px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // Add text stroke for better readability
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 2;
-    ctx.strokeText(code, centerX, centerY);
+    // Draw the text multiple times for bold effect
     ctx.fillText(code, centerX, centerY);
+    ctx.strokeText(code, centerX, centerY);
     
     // Convert canvas to base64
     return canvas.toDataURL('image/png');

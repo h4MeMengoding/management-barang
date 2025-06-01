@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, QrCode, Printer, Eye, Trash2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, QrCode, Download, Eye, Trash2, RefreshCw } from 'lucide-react';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
 import { showSuccess, showError, showCustomConfirm } from '@/lib/alerts';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 interface QRCode {
   _id: string;
@@ -79,8 +81,35 @@ export default function QRCodesPage() {
     }
   };
 
-  const printAllQRCodes = () => {
-    window.print();
+  const downloadAllQRCodes = async () => {
+    if (qrCodes.length === 0) return;
+
+    try {
+      setLoading(true);
+      const zip = new JSZip();
+
+      // Convert each QR code image to blob and add to zip
+      for (const qr of qrCodes) {
+        try {
+          const response = await fetch(qr.qrCode);
+          const blob = await response.blob();
+          zip.file(`QR-${qr.code}.png`, blob);
+        } catch (error) {
+          console.error(`Error processing QR code ${qr.code}:`, error);
+        }
+      }
+
+      // Generate and download the zip file
+      const content = await zip.generateAsync({ type: 'blob' });
+      saveAs(content, `QR-Codes-${new Date().toISOString().split('T')[0]}.zip`);
+      
+      showSuccess(`${qrCodes.length} QR codes berhasil didownload dalam file ZIP!`);
+    } catch (error) {
+      console.error('Error creating ZIP file:', error);
+      showError('Terjadi kesalahan saat membuat file ZIP');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const regenerateAllQRCodes = async () => {
@@ -205,6 +234,7 @@ export default function QRCodesPage() {
                 <ol className="text-blue-200 text-sm space-y-2 list-decimal list-inside">
                   <li>Generate QR codes dalam batch (misalnya 10-50 QR codes sekaligus)</li>
                   <li>Setelah generate, lihat hasilnya di menu &quot;Kelola QR Codes&quot;</li>
+                  <li>Download QR codes dalam format ZIP untuk dicetak</li>
                   <li>Print dan tempel QR codes ke loker fisik</li>
                   <li>Gunakan fitur &quot;Scan QR Code&quot; untuk menginisialisasi loker baru</li>
                   <li>Setelah scan, Anda akan diminta untuk mengisi nama dan deskripsi loker</li>
@@ -252,7 +282,7 @@ export default function QRCodesPage() {
                 <div className="bg-green-900/20 border border-green-700/30 rounded-lg p-6">
                   <h3 className="text-green-300 font-medium mb-3">✅ Setelah Generate</h3>
                   <p className="text-green-200 text-sm mb-3">
-                    Setelah berhasil generate QR codes, silakan buka menu &quot;Kelola QR Codes&quot; untuk melihat, mencetak, dan mengelola QR codes yang telah dibuat.
+                    Setelah berhasil generate QR codes, silakan buka menu &quot;Kelola QR Codes&quot; untuk melihat, mendownload, dan mengelola QR codes yang telah dibuat.
                   </p>
                   <button
                     onClick={() => setView('manage')}
@@ -285,13 +315,13 @@ export default function QRCodesPage() {
                 </h3>
                 <div className="flex flex-wrap gap-3">
                   <button
-                    onClick={printAllQRCodes}
+                    onClick={downloadAllQRCodes}
                     disabled={loading || qrCodes.length === 0}
                     className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Print semua QR codes"
+                    title="Download semua QR codes dalam file ZIP"
                   >
-                    <Printer size={16} />
-                    <span>Print All</span>
+                    <Download size={16} />
+                    <span>Download QR</span>
                   </button>
                   <button
                     onClick={regenerateAllQRCodes}
