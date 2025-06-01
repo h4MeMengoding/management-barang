@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, Save, RefreshCw } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function NewLocker() {
   const router = useRouter();
@@ -56,14 +57,15 @@ export default function NewLocker() {
       });
 
       if (response.ok) {
+        toast.success('Loker berhasil dibuat!');
         router.push('/');
       } else {
         const error = await response.json();
-        alert(error.error || 'Gagal membuat loker');
+        toast.error(error.error || 'Gagal membuat loker');
       }
     } catch (error) {
       console.error('Error creating locker:', error);
-      alert('Gagal membuat loker');
+      toast.error('Gagal membuat loker');
     } finally {
       setLoading(false);
     }

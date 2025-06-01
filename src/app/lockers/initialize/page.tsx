@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Save, QrCode } from 'lucide-react';
+import { showSuccess, showError, showWarning } from '@/lib/alerts';
 
 function InitializeLockerContent() {
   const searchParams = useSearchParams();
@@ -21,7 +22,7 @@ function InitializeLockerContent() {
     e.preventDefault();
     
     if (!formData.label.trim()) {
-      alert('Nama loker harus diisi');
+      showWarning('Nama loker harus diisi');
       return;
     }
 
@@ -41,15 +42,15 @@ function InitializeLockerContent() {
 
       if (response.ok) {
         const data = await response.json();
-        alert('Loker berhasil diinisiasi!');
+        showSuccess('Loker berhasil diinisiasi!');
         router.push(`/lockers/${data.locker._id}`);
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message}`);
+        showError(`Error: ${error.message}`);
       }
     } catch (error) {
       console.error('Error initializing locker:', error);
-      alert('Terjadi kesalahan saat menginisiasi loker');
+      showError('Terjadi kesalahan saat menginisiasi loker');
     } finally {
       setLoading(false);
     }

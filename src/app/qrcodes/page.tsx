@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, QrCode, Printer, Eye, Trash2, RefreshCw } from 'lucide-react';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
+import { showSuccess, showError, showCustomConfirm } from '@/lib/alerts';
 
 interface QRCode {
   _id: string;
@@ -33,11 +34,11 @@ export default function QRCodesPage() {
         const data = await response.json();
         setQrCodes(Array.isArray(data) ? data : []);
       } else {
-        alert('Gagal memuat QR codes');
+        showError('Gagal memuat QR codes');
       }
     } catch (error) {
       console.error('Error loading QR codes:', error);
-      alert('Terjadi kesalahan saat memuat QR codes');
+      showError('Terjadi kesalahan saat memuat QR codes');
       setQrCodes([]);
     } finally {
       setLoading(false);
@@ -66,14 +67,14 @@ export default function QRCodesPage() {
       if (response.ok) {
         const data = await response.json();
         setQrCodes(prev => [...prev, ...data.qrCodes]);
-        alert(`${data.qrCodes.length} QR codes berhasil dibuat!`);
+        showSuccess(`${data.qrCodes.length} QR codes berhasil dibuat!`);
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message}`);
+        showError(`Error: ${error.message}`);
       }
     } catch (error) {
       console.error('Error generating QR codes:', error);
-      alert('Terjadi kesalahan saat membuat QR codes');
+      showError('Terjadi kesalahan saat membuat QR codes');
     } finally {
       setLoading(false);
     }
@@ -86,51 +87,60 @@ export default function QRCodesPage() {
   const regenerateAllQRCodes = async () => {
     if (!session) return;
     
-    if (!confirm('Apakah Anda yakin ingin meregenerasi semua QR codes? Ini akan memperbarui semua QR codes dengan tampilan angka loker di tengah.')) {
-      return;
-    }
+    showCustomConfirm(
+      'Regenerasi QR Codes',
+      'Apakah Anda yakin ingin meregenerasi semua QR codes? Ini akan memperbarui semua QR codes dengan tampilan angka loker di tengah.',
+      'Regenerasi',
+      async () => {
+        setLoading(true);
+        try {
+          const response = await fetch('/api/qrcodes/regenerate', {
+            method: 'PUT',
+          });
 
-    setLoading(true);
-    try {
-      const response = await fetch('/api/qrcodes/regenerate', {
-        method: 'PUT',
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        alert(`${data.qrCodes.length} QR codes berhasil diregenerasi dengan angka di tengah!`);
-        // Reload the QR codes to show updated versions
-        await loadExistingQRCodes();
-      } else {
-        const error = await response.json();
-        alert(`Error: ${error.message}`);
-      }
-    } catch (error) {
-      console.error('Error regenerating QR codes:', error);
-      alert('Terjadi kesalahan saat meregenerasi QR codes');
-    } finally {
-      setLoading(false);
-    }
+          if (response.ok) {
+            const data = await response.json();
+            showSuccess(`${data.qrCodes.length} QR codes berhasil diregenerasi dengan angka di tengah!`);
+            // Reload the QR codes to show updated versions
+            await loadExistingQRCodes();
+          } else {
+            const error = await response.json();
+            showError(`Error: ${error.message}`);
+          }
+        } catch (error) {
+          console.error('Error regenerating QR codes:', error);
+          showError('Terjadi kesalahan saat meregenerasi QR codes');
+        } finally {
+          setLoading(false);
+        }
+      },
+      'primary'
+    );
   };
 
   const deleteQRCode = async (qrCodeId: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus QR code ini?')) return;
+    showCustomConfirm(
+      'Hapus QR Code',
+      'Apakah Anda yakin ingin menghapus QR code ini?',
+      'Hapus',
+      async () => {
+        try {
+          const response = await fetch(`/api/qrcodes/${qrCodeId}`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const response = await fetch(`/api/qrcodes/${qrCodeId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setQrCodes(prev => prev.filter(qr => qr._id !== qrCodeId));
-        alert('QR code berhasil dihapus');
-      } else {
-        alert('Gagal menghapus QR code');
+          if (response.ok) {
+            setQrCodes(prev => prev.filter(qr => qr._id !== qrCodeId));
+            showSuccess('QR code berhasil dihapus');
+          } else {
+            showError('Gagal menghapus QR code');
+          }
+        } catch (error) {
+          console.error('Error deleting QR code:', error);
+          showError('Terjadi kesalahan saat menghapus QR code');
+        }
       }
-    } catch (error) {
-      console.error('Error deleting QR code:', error);
-      alert('Terjadi kesalahan saat menghapus QR code');
-    }
+    );
   };
 
   if (!session) {

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { ArrowLeft, Save, Package } from 'lucide-react';
+import { showSuccess, showError } from '@/lib/alerts';
 
 interface Locker {
   _id: string;
@@ -57,14 +58,15 @@ export default function NewItem() {
       });
 
       if (response.ok) {
+        showSuccess('Barang berhasil ditambahkan!');
         router.push('/');
       } else {
         const error = await response.json();
-        alert(error.error || 'Gagal membuat barang');
+        showError(error.error || 'Gagal membuat barang');
       }
     } catch (error) {
       console.error('Error creating item:', error);
-      alert('Gagal membuat barang');
+      showError('Gagal membuat barang');
     } finally {
       setLoading(false);
     }

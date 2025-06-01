@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, Package, Plus, QrCode, Download, Edit2, Trash2, Settings } from 'lucide-react';
 import Image from 'next/image';
+import { showSuccess, showError, showCustomConfirm } from '@/lib/alerts';
 
 interface Locker {
   _id: string;
@@ -75,47 +76,55 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
   }, [session, lockerId, fetchLockerData]);
 
   const deleteItem = async (itemId: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus barang ini?')) {
-      return;
-    }
+    showCustomConfirm(
+      'Hapus Barang',
+      'Apakah Anda yakin ingin menghapus barang ini?',
+      'Hapus',
+      async () => {
+        try {
+          const response = await fetch(`/api/items/${itemId}`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const response = await fetch(`/api/items/${itemId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        // Refresh the locker data to update the items list
-        fetchLockerData();
-      } else {
-        alert('Gagal menghapus barang. Silakan coba lagi.');
+          if (response.ok) {
+            showSuccess('Barang berhasil dihapus');
+            // Refresh the locker data to update the items list
+            fetchLockerData();
+          } else {
+            showError('Gagal menghapus barang. Silakan coba lagi.');
+          }
+        } catch (error) {
+          console.error('Error deleting item:', error);
+          showError('Terjadi kesalahan. Silakan coba lagi.');
+        }
       }
-    } catch (error) {
-      console.error('Error deleting item:', error);
-      alert('Terjadi kesalahan. Silakan coba lagi.');
-    }
+    );
   };
 
   const deleteLocker = async () => {
-    if (!confirm('Apakah Anda yakin ingin menghapus loker ini? Pastikan semua barang sudah dipindahkan atau dihapus terlebih dahulu.')) {
-      return;
-    }
+    showCustomConfirm(
+      'Hapus Loker',
+      'Apakah Anda yakin ingin menghapus loker ini? Pastikan semua barang sudah dipindahkan atau dihapus terlebih dahulu.',
+      'Hapus',
+      async () => {
+        try {
+          const response = await fetch(`/api/lockers/${lockerId}`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const response = await fetch(`/api/lockers/${lockerId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        router.push('/');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Gagal menghapus loker. Silakan coba lagi.');
+          if (response.ok) {
+            showSuccess('Loker berhasil dihapus');
+            router.push('/');
+          } else {
+            const errorData = await response.json();
+            showError(errorData.error || 'Gagal menghapus loker. Silakan coba lagi.');
+          }
+        } catch (error) {
+          console.error('Error deleting locker:', error);
+          showError('Terjadi kesalahan. Silakan coba lagi.');
+        }
       }
-    } catch (error) {
-      console.error('Error deleting locker:', error);
-      alert('Terjadi kesalahan. Silakan coba lagi.');
-    }
+    );
   };
 
   const downloadQRCode = () => {

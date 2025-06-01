@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, Save } from 'lucide-react';
+import { showSuccess, showError } from '@/lib/alerts';
 
 interface Locker {
   _id: string;
@@ -86,14 +87,15 @@ function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }
       });
 
       if (response.ok) {
+        showSuccess('Loker berhasil diperbarui!');
         router.push(`/lockers/${lockerId}`);
       } else {
         const errorData = await response.json();
-        alert(errorData.error || 'Gagal mengupdate loker. Silakan coba lagi.');
+        showError(errorData.error || 'Gagal mengupdate loker. Silakan coba lagi.');
       }
     } catch (error) {
       console.error('Error updating locker:', error);
-      alert('Terjadi kesalahan. Silakan coba lagi.');
+      showError('Terjadi kesalahan. Silakan coba lagi.');
     } finally {
       setSubmitting(false);
     }

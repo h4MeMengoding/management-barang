@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Plus, Package, QrCode, Search, Eye, Edit2, Trash2, MoreVertical } from 'lucide-react';
 import Image from 'next/image';
+import { showSuccess, showError, showCustomConfirm } from '@/lib/alerts';
 
 interface Locker {
   _id: string;
@@ -86,27 +87,32 @@ export default function Home() {
   };
 
   const deleteLocker = async (lockerId: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus loker ini? Pastikan semua barang sudah dipindahkan atau dihapus terlebih dahulu.')) {
-      return;
-    }
+    showCustomConfirm(
+      'Hapus Loker',
+      'Apakah Anda yakin ingin menghapus loker ini? Pastikan semua barang sudah dipindahkan atau dihapus terlebih dahulu.',
+      'Hapus',
+      async () => {
+        try {
+          const response = await fetch(`/api/lockers/${lockerId}`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const response = await fetch(`/api/lockers/${lockerId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        // Refresh the data
-        fetchData();
-        setDropdownOpen(null);
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Gagal menghapus loker. Silakan coba lagi.');
-      }
-    } catch (error) {
-      console.error('Error deleting locker:', error);
-      alert('Terjadi kesalahan. Silakan coba lagi.');
-    }
+          if (response.ok) {
+            // Refresh the data
+            fetchData();
+            setDropdownOpen(null);
+            showSuccess('Loker berhasil dihapus');
+          } else {
+            const errorData = await response.json();
+            showError(errorData.error || 'Gagal menghapus loker. Silakan coba lagi.');
+          }
+        } catch (error) {
+          console.error('Error deleting locker:', error);
+          showError('Terjadi kesalahan. Silakan coba lagi.');
+        }
+      },
+      'danger'
+    );
   };
 
   const filteredLockers = lockers.filter(locker =>

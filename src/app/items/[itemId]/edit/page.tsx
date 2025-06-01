@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { showSuccess, showError } from '@/lib/alerts';
 
 interface Item {
   _id: string;
@@ -115,13 +116,14 @@ function EditItemContent({ params }: { params: Promise<{ itemId: string }> }) {
       });
 
       if (response.ok) {
+        showSuccess('Barang berhasil diperbarui!');
         router.push(`/lockers/${formData.lockerId}`);
       } else {
-        alert('Gagal mengupdate barang. Silakan coba lagi.');
+        showError('Gagal mengupdate barang. Silakan coba lagi.');
       }
     } catch (error) {
       console.error('Error updating item:', error);
-      alert('Terjadi kesalahan. Silakan coba lagi.');
+      showError('Terjadi kesalahan. Silakan coba lagi.');
     } finally {
       setSubmitting(false);
     }
