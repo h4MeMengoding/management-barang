@@ -14,7 +14,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { canInstall, isInstalled, installPWA, isIOSChrome } = usePWA();
+  const { canInstall, isInstalled, installPWA } = usePWA();
 
   // Close dropdown when clicking outside
   useEffect(() => {
