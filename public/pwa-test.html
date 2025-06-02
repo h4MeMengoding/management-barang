@@ -175,8 +175,8 @@
 
             // Icons check
             Promise.all([
-                fetch('/icons/icon-192x192.png'),
-                fetch('/icons/icon-512x512.png')
+                fetch('/icons/icon-barangku-192x192.png'),
+                fetch('/icons/icon-barangku-512x512.png')
             ]).then(responses => {
                 if (responses.every(r => r.ok)) {
                     setStatus('icons-status', 'Available', 'success');
@@ -232,7 +232,7 @@
 
         function testIcons() {
             const iconSizes = ['72x72', '96x96', '128x128', '144x144', '152x152', '192x192', '384x384', '512x512'];
-            Promise.all(iconSizes.map(size => fetch(`/icons/icon-${size}.png`)))
+            Promise.all(iconSizes.map(size => fetch(`/icons/icon-barangku-${size}.png`)))
                 .then(responses => {
                     const available = responses.filter(r => r.ok).length;
                     alert(`✅ Icons check complete!\n\nAvailable: ${available}/${iconSizes.length} icons`);

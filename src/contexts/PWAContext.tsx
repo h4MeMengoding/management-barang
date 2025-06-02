@@ -83,7 +83,7 @@ export function PWAProvider({ children }: { children: ReactNode }) {
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('Management Barang', {
           body: 'Aplikasi berhasil diinstall! Sekarang dapat diakses dari layar utama.',
-          icon: '/icons/icon-192x192.png'
+          icon: '/icons/icon-barangku-192x192.png'
         });
       }
     };
