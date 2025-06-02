@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Test - Management Barang</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .success { background: #dcfce7; color: #166534; }
+        .error { background: #fef2f2; color: #dc2626; }
+        .warning { background: #fefce8; color: #ca8a04; }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .pwa-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 PWA Test Dashboard</h1>
+    <p>Test halaman untuk memverifikasi fitur PWA Management Barang</p>
+
+    <div class="test-card">
+        <h2>📋 PWA Readiness Check</h2>
+        <div id="pwa-checks">
+            <div>Service Worker: <span id="sw-status" class="status">Checking...</span></div>
+            <div>Manifest: <span id="manifest-status" class="status">Checking...</span></div>
+            <div>Install Ready: <span id="install-status" class="status">Checking...</span></div>
+            <div>Offline Ready: <span id="offline-status" class="status">Checking...</span></div>
+            <div>Icons Available: <span id="icons-status" class="status">Checking...</span></div>
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h2>🧪 Manual Tests</h2>
+        <button class="test-button" onclick="testServiceWorker()">Test Service Worker</button>
+        <button class="test-button" onclick="testManifest()">Test Manifest</button>
+        <button class="test-button" onclick="testIcons()">Test Icons</button>
+        <button class="test-button" onclick="testOffline()">Test Offline</button>
+        <button class="test-button" onclick="triggerInstall()">Trigger Install</button>
+    </div>
+
+    <div class="test-card">
+        <h2>🎯 PWA Features</h2>
+        <div class="pwa-features">
+            <div class="feature-card">
+                <h3>✅ Installable</h3>
+                <p>App dapat diinstall di device pengguna</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔄 Service Worker</h3>
+                <p>Background sync dan caching</p>
+            </div>
+            <div class="feature-card">
+                <h3>📱 Responsive</h3>
+                <p>Desain adaptif untuk semua device</p>
+            </div>
+            <div class="feature-card">
+                <h3>🌐 Offline Ready</h3>
+                <p>Bekerja tanpa koneksi internet</p>
+            </div>
+            <div class="feature-card">
+                <h3>🚀 Fast Loading</h3>
+                <p>Cache strategis untuk performa optimal</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔐 Secure</h3>
+                <p>HTTPS dan security headers</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h2>📊 Browser Support</h2>
+        <div id="browser-info">
+            <div>User Agent: <span id="user-agent"></span></div>
+            <div>PWA Support: <span id="pwa-support"></span></div>
+            <div>Install Support: <span id="install-support"></span></div>
+            <div>Service Worker Support: <span id="sw-support"></span></div>
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h2>🔗 Navigation</h2>
+        <button class="test-button" onclick="goToApp()">🏠 Kembali ke App</button>
+        <button class="test-button" onclick="openDevTools()">🔧 Open DevTools</button>
+    </div>
+
+    <script>
+        // Initial checks
+        window.addEventListener('load', () => {
+            checkPWAReadiness();
+            updateBrowserInfo();
+        });
+
+        function checkPWAReadiness() {
+            // Service Worker check
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration('/sw.js')
+                    .then(registration => {
+                        if (registration) {
+                            setStatus('sw-status', 'Registered', 'success');
+                        } else {
+                            setStatus('sw-status', 'Not Found', 'error');
+                        }
+                    })
+                    .catch(() => setStatus('sw-status', 'Error', 'error'));
+            } else {
+                setStatus('sw-status', 'Not Supported', 'error');
+            }
+
+            // Manifest check
+            fetch('/manifest.json')
+                .then(response => {
+                    if (response.ok) {
+                        setStatus('manifest-status', 'Available', 'success');
+                    } else {
+                        setStatus('manifest-status', 'Missing', 'error');
+                    }
+                })
+                .catch(() => setStatus('manifest-status', 'Error', 'error'));
+
+            // Install readiness
+            if ('beforeinstallprompt' in window || window.matchMedia('(display-mode: standalone)').matches) {
+                setStatus('install-status', 'Ready', 'success');
+            } else {
+                setStatus('install-status', 'Limited', 'warning');
+            }
+
+            // Offline check
+            if ('serviceWorker' in navigator && 'caches' in window) {
+                setStatus('offline-status', 'Supported', 'success');
+            } else {
+                setStatus('offline-status', 'Limited', 'warning');
+            }
+
+            // Icons check
+            Promise.all([
+                fetch('/icons/icon-192x192.png'),
+                fetch('/icons/icon-512x512.png')
+            ]).then(responses => {
+                if (responses.every(r => r.ok)) {
+                    setStatus('icons-status', 'Available', 'success');
+                } else {
+                    setStatus('icons-status', 'Missing', 'error');
+                }
+            }).catch(() => setStatus('icons-status', 'Error', 'error'));
+        }
+
+        function setStatus(id, text, type) {
+            const element = document.getElementById(id);
+            element.textContent = text;
+            element.className = `status ${type}`;
+        }
+
+        function updateBrowserInfo() {
+            document.getElementById('user-agent').textContent = navigator.userAgent;
+            
+            const pwaSupport = 'serviceWorker' in navigator && 'PushManager' in window;
+            setStatus('pwa-support', pwaSupport ? 'Full' : 'Partial', pwaSupport ? 'success' : 'warning');
+            
+            const installSupport = 'beforeinstallprompt' in window;
+            setStatus('install-support', installSupport ? 'Yes' : 'No', installSupport ? 'success' : 'warning');
+            
+            const swSupport = 'serviceWorker' in navigator;
+            setStatus('sw-support', swSupport ? 'Yes' : 'No', swSupport ? 'success' : 'error');
+        }
+
+        function testServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    alert('✅ Service Worker is active and ready!');
+                    console.log('SW Registration:', registration);
+                }).catch(error => {
+                    alert('❌ Service Worker error: ' + error.message);
+                });
+            } else {
+                alert('❌ Service Worker not supported in this browser');
+            }
+        }
+
+        function testManifest() {
+            fetch('/manifest.json')
+                .then(response => response.json())
+                .then(manifest => {
+                    alert('✅ Manifest loaded successfully!\n\nApp Name: ' + manifest.name + '\nDescription: ' + manifest.description);
+                    console.log('Manifest:', manifest);
+                })
+                .catch(error => {
+                    alert('❌ Manifest error: ' + error.message);
+                });
+        }
+
+        function testIcons() {
+            const iconSizes = ['72x72', '96x96', '128x128', '144x144', '152x152', '192x192', '384x384', '512x512'];
+            Promise.all(iconSizes.map(size => fetch(`/icons/icon-${size}.png`)))
+                .then(responses => {
+                    const available = responses.filter(r => r.ok).length;
+                    alert(`✅ Icons check complete!\n\nAvailable: ${available}/${iconSizes.length} icons`);
+                })
+                .catch(error => {
+                    alert('❌ Icons test error: ' + error.message);
+                });
+        }
+
+        function testOffline() {
+            if ('serviceWorker' in navigator && 'caches' in window) {
+                caches.keys().then(cacheNames => {
+                    alert(`✅ Cache check complete!\n\nActive caches: ${cacheNames.length}\nCaches: ${cacheNames.join(', ')}`);
+                    console.log('Caches:', cacheNames);
+                });
+            } else {
+                alert('❌ Offline features not supported');
+            }
+        }
+
+        function triggerInstall() {
+            if (window.deferredPrompt) {
+                window.deferredPrompt.prompt();
+                window.deferredPrompt.userChoice.then(choiceResult => {
+                    if (choiceResult.outcome === 'accepted') {
+                        alert('✅ User accepted the install prompt');
+                    } else {
+                        alert('ℹ️ User dismissed the install prompt');
+                    }
+                    window.deferredPrompt = null;
+                });
+            } else {
+                alert('ℹ️ Install prompt not available\n\nTry:\n- Refresh the page\n- Visit the main app first\n- Use browser menu to install');
+            }
+        }
+
+        function goToApp() {
+            window.location.href = '/';
+        }
+
+        function openDevTools() {
+            alert('💡 To check PWA in DevTools:\n\n1. Press F12\n2. Go to Application tab\n3. Check Service Workers\n4. Check Manifest\n5. Check Storage');
+        }
+
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.deferredPrompt = e;
+            console.log('Install prompt available');
+        });
+
+        // Listen for app installed
+        window.addEventListener('appinstalled', () => {
+            alert('🎉 App installed successfully!');
+            console.log('PWA was installed');
+        });
+    </script>
+</body>
+</html>

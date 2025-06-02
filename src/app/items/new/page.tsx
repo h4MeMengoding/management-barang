@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { ArrowLeft, Save, Package } from 'lucide-react';
 import { showSuccess, showError } from '@/lib/alerts';
+import CategoryAutocomplete from '@/components/CategoryAutocomplete';
 
 interface Locker {
   _id: string;
@@ -80,6 +81,13 @@ export default function NewItem() {
     });
   };
 
+  const handleCategoryChange = (category: string) => {
+    setFormData({
+      ...formData,
+      category: category,
+    });
+  };
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center dark-theme">
@@ -146,16 +154,16 @@ export default function NewItem() {
                 <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-3">
                   Kategori *
                 </label>
-                <input
-                  type="text"
-                  id="category"
-                  name="category"
-                  required
+                <CategoryAutocomplete
                   value={formData.category}
-                  onChange={handleChange}
-                  placeholder="Contoh: Elektronik, Buku, Pakaian, dst"
-                  className="w-full dark-input text-gray-200 placeholder-gray-500"
+                  onChange={handleCategoryChange}
+                  placeholder="Ketik atau pilih kategori (contoh: Elektronik, Buku, Pakaian)"
+                  required
+                  className="dark-input text-gray-200 placeholder-gray-500"
                 />
+                <p className="text-xs text-gray-500 mt-2">
+                  💡 Ketik kategori baru untuk menambahkannya secara otomatis
+                </p>
               </div>
 
               <div>

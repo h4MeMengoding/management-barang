@@ -306,37 +306,47 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {items.map((item) => (
                     <div key={item._id} className="border border-gray-600 bg-gray-700/50 rounded-lg p-4 hover:bg-gray-700/70 transition-all duration-200">
-                      <div className="flex justify-between items-start mb-3">
-                        <h3 className="font-medium text-gray-200">{item.name}</h3>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-300 bg-gray-600/50 px-2 py-1 rounded">×{item.quantity}</span>
-                          <div className="flex space-x-1">
+                      <div className="flex flex-col gap-3">
+                        {/* Item Header */}
+                        <div className="flex justify-between items-start">
+                          <h3 className="font-medium text-gray-200 flex-1 min-w-0 pr-2">
+                            {item.name} ({item.quantity})
+                          </h3>
+                          <div className="flex space-x-1 flex-shrink-0">
                             <button
                               onClick={() => router.push(`/items/${item._id}/edit`)}
-                              className="p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200"
+                              className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200"
                               title="Edit barang"
                             >
                               <Edit2 size={14} />
                             </button>
                             <button
                               onClick={() => deleteItem(item._id)}
-                              className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200"
+                              className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200"
                               title="Hapus barang"
                             >
                               <Trash2 size={14} />
                             </button>
                           </div>
                         </div>
+                        
+                        {/* Category Badge */}
+                        <div className="flex items-center">
+                          <span className="text-xs px-2 py-1 bg-blue-900/30 text-blue-300 rounded-full border border-blue-500/30">
+                            {item.category}
+                          </span>
+                        </div>
+                        
+                        {/* Description */}
+                        {item.description && (
+                          <p className="text-sm text-gray-400 break-words line-clamp-2">{item.description}</p>
+                        )}
+                        
+                        {/* Date */}
+                        <p className="text-xs text-gray-500">
+                          Ditambahkan: {new Date(item.createdAt).toLocaleDateString('id-ID')}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-300 mb-2">
-                        <span className="text-gray-400">Kategori:</span> {item.category}
-                      </p>
-                      {item.description && (
-                        <p className="text-sm text-gray-400 mb-3">{item.description}</p>
-                      )}
-                      <p className="text-xs text-gray-500">
-                        Ditambahkan: {new Date(item.createdAt).toLocaleDateString('id-ID')}
-                      </p>
                     </div>
                   ))}
                 </div>

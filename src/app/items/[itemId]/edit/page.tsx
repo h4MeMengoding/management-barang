@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, Save } from 'lucide-react';
 import { showSuccess, showError } from '@/lib/alerts';
+import CategoryAutocomplete from '@/components/CategoryAutocomplete';
 
 interface Item {
   _id: string;
@@ -137,6 +138,13 @@ function EditItemContent({ params }: { params: Promise<{ itemId: string }> }) {
     }));
   };
 
+  const handleCategoryChange = (category: string) => {
+    setFormData(prev => ({
+      ...prev,
+      category: category,
+    }));
+  };
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center dark-theme">
@@ -224,23 +232,15 @@ function EditItemContent({ params }: { params: Promise<{ itemId: string }> }) {
               <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-3">
                 Kategori *
               </label>
-              <select
-                id="category"
-                name="category"
+              <CategoryAutocomplete
                 value={formData.category}
-                onChange={handleChange}
+                onChange={handleCategoryChange}
+                placeholder="Pilih atau ketik kategori baru"
                 required
-                className="w-full dark-input text-gray-200"
-              >
-                <option value="">Pilih kategori</option>
-                <option value="Elektronik">Elektronik</option>
-                <option value="Alat Rumah Tangga">Alat Rumah Tangga</option>
-                <option value="Pakaian">Pakaian</option>
-                <option value="Makanan">Makanan</option>
-                <option value="Alat Tulis">Alat Tulis</option>
-                <option value="Obat-obatan">Obat-obatan</option>
-                <option value="Lainnya">Lainnya</option>
-              </select>
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Ketik untuk mencari kategori atau membuat kategori baru
+              </p>
             </div>
 
             <div>

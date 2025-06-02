@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import Navbar from "@/components/Navbar";
+import PWAInstaller from "@/components/PWAInstaller";
+import OfflineIndicator from "@/components/OfflineIndicator";
+import PWAStatusIndicator from "@/components/PWAStatusIndicator";
 import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({
@@ -11,9 +14,42 @@ const inter = Inter({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#3b82f6',
+}
+
 export const metadata: Metadata = {
   title: "Management Barang",
   description: "Sistem manajement barang dengan QR Code",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Management Barang",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "Management Barang",
+    "application-name": "Management Barang",
+    "msapplication-TileColor": "#3b82f6",
+    "msapplication-config": "/browserconfig.xml",
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +64,10 @@ export default function RootLayout({
       >
         <Providers>
           <NavbarWrapper />
+          <OfflineIndicator />
+          <PWAStatusIndicator />
           {children}
+          <PWAInstaller />
           <Toaster
             position="top-right"
             toastOptions={{

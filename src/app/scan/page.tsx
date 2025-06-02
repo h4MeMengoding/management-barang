@@ -380,13 +380,18 @@ export default function QRScanner() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {scanResult.items.map((item) => (
-                  <div key={item._id} className="border border-gray-600 rounded-lg p-4 bg-gray-700/30">
-                    <h4 className="font-medium text-white">{item.name}</h4>
-                    <p className="text-sm text-gray-400">Kategori: {item.category}</p>
-                    <p className="text-sm text-gray-400">Jumlah: {item.quantity}</p>
-                    {item.description && (
-                      <p className="text-sm text-gray-400 mt-2">{item.description}</p>
-                    )}
+                  <div key={item._id} className="border border-gray-600 rounded-lg p-4 bg-gray-700/30 hover:bg-gray-700/50 transition-all duration-200">
+                    <div className="flex flex-col gap-2">
+                      <h4 className="font-medium text-white">
+                        {item.name} ({item.quantity})
+                      </h4>
+                      <span className="text-xs px-2 py-1 bg-blue-900/30 text-blue-300 rounded-full border border-blue-500/30 w-fit">
+                        {item.category}
+                      </span>
+                      {item.description && (
+                        <p className="text-sm text-gray-400 mt-1 break-words line-clamp-2">{item.description}</p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

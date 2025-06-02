@@ -108,7 +108,25 @@ const ItemSchema = new mongoose.Schema({
   timestamps: true,
 });
 
+const CategorySchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+}, {
+  timestamps: true,
+});
+
+// Compound index for unique category names per user
+CategorySchema.index({ name: 1, userId: 1 }, { unique: true });
+
 export const QRCode = mongoose.models.QRCode || mongoose.model('QRCode', QRCodeSchema);
 export const User = mongoose.models.User || mongoose.model('User', UserSchema);
 export const Locker = mongoose.models.Locker || mongoose.model('Locker', LockerSchema);
 export const Item = mongoose.models.Item || mongoose.model('Item', ItemSchema);
+export const Category = mongoose.models.Category || mongoose.model('Category', CategorySchema);
