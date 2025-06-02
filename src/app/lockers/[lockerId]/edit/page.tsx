@@ -35,13 +35,10 @@ function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }
     if (!lockerId) return;
     
     try {
-      console.log('Fetching locker data for ID:', lockerId);
       const response = await fetch(`/api/lockers/${lockerId}`);
-      console.log('Response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Response data:', data);
         
         if (data.locker) {
           setLocker(data.locker);

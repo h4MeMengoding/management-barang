@@ -20,8 +20,6 @@ export async function POST(request: NextRequest) {
     }
 
     const { qrData } = await request.json();
-    
-    console.log('Scan API received QR data:', qrData);
 
     // Cleanup the data by trimming whitespace
     const cleanQrData = qrData.trim();
@@ -30,19 +28,15 @@ export async function POST(request: NextRequest) {
     // Handle different formats: qrcode:CODE, just the CODE itself, etc.
     if (cleanQrData.startsWith('qrcode:')) {
       qrCodeValue = cleanQrData.replace('qrcode:', '').trim();
-      console.log('Detected qrcode prefix format with code:', qrCodeValue);
     } else if (/^\d{4}$/.test(cleanQrData)) {
       // Already just the 4 digit code
       qrCodeValue = cleanQrData;
-      console.log('Detected plain 4-digit code:', qrCodeValue);
     } else {
       // Try to extract 4-digit code if embedded in other content
       const digitMatch = cleanQrData.match(/\b\d{4}\b/);
       if (digitMatch) {
         qrCodeValue = digitMatch[0];
-        console.log('Extracted 4-digit code from content:', qrCodeValue);
       } else {
-        console.log('Unknown QR format, trying as-is:', cleanQrData);
         qrCodeValue = cleanQrData;
       }
     }
@@ -51,8 +45,6 @@ export async function POST(request: NextRequest) {
     const qrCode = await QRCode.findOne({ code: qrCodeValue, userId: user._id });
     
     if (qrCode) {
-      console.log('QR code found:', qrCode._id);
-
       // If QR code is already used, redirect to existing locker
       if (qrCode.isUsed && qrCode.lockerId) {
         const locker = await Locker.findById(qrCode.lockerId);
@@ -97,7 +89,6 @@ export async function POST(request: NextRequest) {
     }
     
     // If we got here, no QR code or locker was found
-    console.log('No matching QR code found for:', qrCodeValue);
     return NextResponse.json({ 
       error: 'QR Code tidak ditemukan atau format tidak valid', 
       receivedFormat: qrData 

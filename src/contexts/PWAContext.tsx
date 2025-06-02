@@ -34,15 +34,15 @@ export function PWAProvider({ children }: { children: ReactNode }) {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
         .then((registration) => {
-          console.log('SW registered: ', registration);
+          // Service Worker registered successfully
           
           // Check for updates
           registration.addEventListener('updatefound', () => {
-            console.log('SW update found');
+            // Service Worker update found
           });
         })
-        .catch((registrationError) => {
-          console.log('SW registration failed: ', registrationError);
+        .catch(() => {
+          // Service Worker registration failed
         });
     }
 
@@ -52,12 +52,10 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     
     if (isInStandaloneMode || isIOSInstalled) {
       setIsInstalled(true);
-      console.log('App is already installed');
     }
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-      console.log('beforeinstallprompt event fired');
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
@@ -66,7 +64,6 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
-      console.log('PWA was installed successfully');
       
       // Show success message
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -91,17 +88,11 @@ export function PWAProvider({ children }: { children: ReactNode }) {
 
     try {
       deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-      } else {
-        console.log('User dismissed the install prompt');
-      }
+      await deferredPrompt.userChoice;
       
       setDeferredPrompt(null);
-    } catch (error) {
-      console.error('Error installing PWA:', error);
+    } catch {
+      // Error installing PWA - silent fail for production
     }
   };
 

@@ -4,8 +4,6 @@ import { User } from '@/models';
 
 export async function GET() {
   try {
-    console.log('Testing database connection...');
-    
     // Test connection
     await dbConnect();
     

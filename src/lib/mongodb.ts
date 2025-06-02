@@ -35,14 +35,11 @@ if (!global.mongoose) {
 async function dbConnect(): Promise<typeof mongoose> {
   // If we have a cached connection, return it
   if (cached.conn) {
-    console.log('Using cached MongoDB connection');
     return cached.conn;
   }
 
   // If no cached promise, create a new connection
   if (!cached.promise) {
-    console.log('Creating new MongoDB connection...');
-    
     const opts = {
       bufferCommands: false,
       maxPoolSize: 10, // Maintain up to 10 socket connections
@@ -52,7 +49,6 @@ async function dbConnect(): Promise<typeof mongoose> {
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      console.log('MongoDB connected successfully');
       return mongoose;
     }).catch((error) => {
       console.error('MongoDB connection error:', error);

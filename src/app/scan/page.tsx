@@ -43,8 +43,8 @@ export default function QRScanner() {
         return permission.state;
       }
       return 'unknown';
-    } catch (error) {
-      console.log('Permission API not supported', error);
+    } catch {
+      // Permission API not supported
       return 'unknown';
     }
   };
@@ -75,7 +75,6 @@ export default function QRScanner() {
 
       // Check camera permissions first
       const permissionState = await checkCameraPermissions();
-      console.log('Camera permission state:', permissionState);
 
       if (permissionState === 'denied') {
         throw new Error('Akses kamera ditolak. Silakan enable permission kamera di browser settings dan refresh halaman.');
@@ -93,9 +92,8 @@ export default function QRScanner() {
             height: { ideal: 720 }
           },
         });
-      } catch (envError) {
-        console.log('Environment camera failed, trying default camera:', envError);
-        // Fallback to any available camera
+      } catch {
+        // Environment camera failed, trying default camera
         stream = await navigator.mediaDevices.getUserMedia({
           video: true
         });
@@ -161,7 +159,6 @@ export default function QRScanner() {
           });
         
           if (code) {
-            console.log("QR Code detected!", code.data);
             // Draw a green box around the QR code to give visual feedback
             if (context && code.location) {
               context.strokeStyle = '#00FF00';
@@ -234,8 +231,6 @@ export default function QRScanner() {
 
   const handleQRCodeDetected = async (qrData: string) => {
     try {
-      console.log("QR code detected - data:", qrData);
-      
       setError('');
       
       // Show processing message without stopping camera immediately
@@ -258,7 +253,6 @@ export default function QRScanner() {
       setScanning(false);
       
       const result = await response.json();
-      console.log("Scan API response:", result);
       
       if (response.ok) {
         if (result.type === 'initialize_locker') {
@@ -272,12 +266,9 @@ export default function QRScanner() {
           // Show existing locker details
           setScanResult(result);
           setError('');
-        }
-      } else {
-        console.error("QR code scanning error response:", result);
-        
-        // Provide detailed error feedback
-        if (result.error) {
+        }        } else {
+          // Provide detailed error feedback
+          if (result.error) {
           setError(`${result.error}`);
         } else if (qrData.includes('qrcode:') || qrData.includes('locker:')) {
           setError(`QR Code tidak valid (Format: ${qrData.split(':')[0]})`);

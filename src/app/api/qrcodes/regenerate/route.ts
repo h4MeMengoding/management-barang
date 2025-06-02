@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       const existingQR = await QRCode.findOne({ _id: qrCodeId, userId: user._id });
       
       if (!existingQR) {
-        console.log(`QR Code ${qrCodeId} not found or not owned by user`);
+        // QR Code not found or not owned by user - skip
         continue;
       }
 
