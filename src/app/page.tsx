@@ -509,7 +509,7 @@ export default function Home() {
                     <div className="text-center py-8">
                       <Package className="h-12 w-12 text-gray-500 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-200 mb-2">Barang tidak ditemukan</h3>
-                      <p className="text-gray-400">Tidak ada barang yang sesuai dengan pencarian "{itemSearchTerm}"</p>
+                      <p className="text-gray-400">Tidak ada barang yang sesuai dengan pencarian &ldquo;{itemSearchTerm}&rdquo;</p>
                     </div>
                   ) : itemSearchResults.length > 0 ? (
                     <div className="space-y-4">

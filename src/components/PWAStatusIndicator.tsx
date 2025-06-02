@@ -10,7 +10,7 @@ export default function PWAStatusIndicator() {
   useEffect(() => {
     // Check if app is already installed
     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
-    const isIOSInstalled = (window.navigator as any).standalone === true;
+    const isIOSInstalled = (window.navigator as { standalone?: boolean }).standalone === true;
     
     if (isInStandaloneMode || isIOSInstalled) {
       setIsInstalled(true);

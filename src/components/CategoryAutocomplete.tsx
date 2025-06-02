@@ -208,7 +208,7 @@ export default function CategoryAutocomplete({
                   onClick={() => handleCategorySelect(value.trim())}
                   className="w-full text-left px-4 py-2 text-green-400 hover:bg-green-900/20 transition-colors duration-200 border-t border-slate-600"
                 >
-                  <span className="font-medium">+ Tambah kategori baru:</span> "{value.trim()}"
+                  <span className="font-medium">+ Tambah kategori baru:</span> &ldquo;{value.trim()}&rdquo;
                 </button>
               )}
             </>
@@ -218,7 +218,7 @@ export default function CategoryAutocomplete({
               onClick={() => handleCategorySelect(value.trim())}
               className="w-full text-left px-4 py-2 text-green-400 hover:bg-green-900/20 transition-colors duration-200"
             >
-              <span className="font-medium">+ Tambah kategori baru:</span> "{value.trim()}"
+              <span className="font-medium">+ Tambah kategori baru:</span> &ldquo;{value.trim()}&rdquo;
             </button>
           ) : (
             <div className="p-4 text-center text-gray-400">
