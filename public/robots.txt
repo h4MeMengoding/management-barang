@@ -5,10 +5,21 @@ Allow: /
 Disallow: /api/
 Disallow: /_next/
 Disallow: /admin/
+Disallow: /dashboard/
 
 # Allow PWA files
 Allow: /manifest.json
 Allow: /sw.js
+Allow: /workbox-*.js
+
+# Allow important pages
+Allow: /scan
+Allow: /items
+Allow: /lockers
+Allow: /categories
+
+# Sitemap location
+Sitemap: /sitemap.xml
 Allow: /icons/
 
 # Sitemap (add when available)
