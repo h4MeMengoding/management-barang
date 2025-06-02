@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import IOSInstallModal from '@/components/IOSInstallModal';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -15,6 +16,8 @@ interface PWAContextType {
   deferredPrompt: BeforeInstallPromptEvent | null;
   isInstalled: boolean;
   canInstall: boolean;
+  isIOS: boolean;
+  isIOSChrome: boolean;
   installPWA: () => Promise<void>;
 }
 
@@ -24,10 +27,21 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isIOSChrome, setIsIOSChrome] = useState(false);
+  const [showIOSModal, setShowIOSModal] = useState(false);
 
   useEffect(() => {
     // Set client-side flag
     setIsClient(true);
+
+    // Detect iOS and iOS Chrome
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    const isIOSChromeApp = isIOSDevice && /crios/.test(userAgent);
+    
+    setIsIOS(isIOSDevice);
+    setIsIOSChrome(isIOSChromeApp);
 
     // Register service worker
     if ('serviceWorker' in navigator) {
@@ -54,7 +68,7 @@ export function PWAProvider({ children }: { children: ReactNode }) {
       setIsInstalled(true);
     }
 
-    // Listen for beforeinstallprompt event
+    // Listen for beforeinstallprompt event (Android/Desktop only)
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -84,6 +98,12 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const installPWA = async () => {
+    // For iOS devices, show instruction modal
+    if (isIOS) {
+      setShowIOSModal(true);
+      return;
+    }
+
     if (!deferredPrompt) return;
 
     try {
@@ -96,16 +116,31 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const canInstall = isClient && !!deferredPrompt && !isInstalled;
+  // Can install if:
+  // 1. Has deferredPrompt (Android/Desktop Chrome/Edge)
+  // 2. iOS device in Safari (not Chrome)
+  // 3. iOS Chrome (show instructions)
+  const canInstall = isClient && !isInstalled && (
+    !!deferredPrompt || 
+    (isIOS && !isIOSChrome) || 
+    isIOSChrome
+  );
 
   return (
     <PWAContext.Provider value={{
       deferredPrompt,
       isInstalled,
       canInstall,
+      isIOS,
+      isIOSChrome,
       installPWA
     }}>
       {children}
+      <IOSInstallModal 
+        isOpen={showIOSModal} 
+        onClose={() => setShowIOSModal(false)}
+        isIOSChrome={isIOSChrome}
+      />
     </PWAContext.Provider>
   );
 }
