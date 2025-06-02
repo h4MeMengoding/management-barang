@@ -100,14 +100,14 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/desktop-1.png",
+      "src": "/screenshots/desktop-banner.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Homepage with lockers"
     },
     {
-      "src": "/screenshots/mobile-1.png",
+      "src": "/screenshots/mobile-banner.png",
       "sizes": "320x640",
       "type": "image/png",
       "form_factor": "narrow",

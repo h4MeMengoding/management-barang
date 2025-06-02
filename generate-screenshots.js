@@ -118,7 +118,7 @@ function generateDesktopScreenshot() {
   }
 
   const buffer = canvas.toBuffer('image/png');
-  fs.writeFileSync(path.join(screenshotsDir, 'desktop-1.png'), buffer);
+  fs.writeFileSync(path.join(screenshotsDir, 'desktop-banner.png'), buffer);
   console.log('Generated desktop screenshot');
 }
 
@@ -204,7 +204,7 @@ function generateMobileScreenshot() {
   }
 
   const buffer = canvas.toBuffer('image/png');
-  fs.writeFileSync(path.join(screenshotsDir, 'mobile-1.png'), buffer);
+  fs.writeFileSync(path.join(screenshotsDir, 'mobile-banner.png'), buffer);
   console.log('Generated mobile screenshot');
 }
 

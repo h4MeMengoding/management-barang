@@ -2,17 +2,19 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { LogOut, Package, ChevronDown } from 'lucide-react';
+import { LogOut, Package, ChevronDown, Download } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { showCustomConfirm } from '@/lib/alerts';
+import { usePWA } from '@/contexts/PWAContext';
 
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { canInstall, isInstalled, installPWA } = usePWA();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -39,6 +41,11 @@ export default function Navbar() {
       },
       'danger'
     );
+  };
+
+  const handleInstallPWA = async () => {
+    setDropdownOpen(false);
+    await installPWA();
   };
 
   // Hide navbar on home page if user is not logged in
@@ -102,6 +109,27 @@ export default function Navbar() {
                         {session.user.email}
                       </p>
                     </div>
+                    
+                    {/* PWA Install Button */}
+                    {canInstall && (
+                      <button
+                        onClick={handleInstallPWA}
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors duration-200"
+                      >
+                        <Download size={16} />
+                        <span>Install Aplikasi</span>
+                      </button>
+                    )}
+
+                    {/* PWA Status */}
+                    {isInstalled && (
+                      <div className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-green-400">
+                        <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                        <span>Aplikasi Terinstall</span>
+                      </div>
+                    )}
                     
                     {/* Logout Button */}
                     <button
