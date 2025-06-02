@@ -2,13 +2,44 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { LogOut, Package } from 'lucide-react';
+import { LogOut, Package, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState, useRef, useEffect } from 'react';
+import { showCustomConfirm } from '@/lib/alerts';
 
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    setDropdownOpen(false);
+    showCustomConfirm(
+      'Konfirmasi Logout',
+      'Apakah Anda yakin ingin keluar dari aplikasi?',
+      'Logout',
+      () => {
+        signOut();
+      },
+      'danger'
+    );
+  };
 
   // Hide navbar on home page if user is not logged in
   if (!session && pathname === '/') {
@@ -19,7 +50,7 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
-          {/* Simple Brand */}
+          {/* Brand */}
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Package className="w-5 h-5 text-white" />
@@ -32,12 +63,15 @@ export default function Navbar() {
             </span>
           </Link>
           
-          {/* Simple User Section */}
+          {/* User Section with Dropdown */}
           <div className="flex items-center space-x-3">
             {session?.user ? (
-              <>
-                {/* Simple User Info */}
-                <div className="flex items-center space-x-3 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div className="relative" ref={dropdownRef}>
+                {/* Profile Button */}
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center space-x-3 px-3 py-2 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg border border-slate-700/50 transition-colors duration-200"
+                >
                   <Image
                     src={session.user.image || `https://ui-avatars.com/api/?name=${session.user.name || 'User'}&size=32&background=3B82F6&color=ffffff&rounded=true`}
                     alt={session.user.name || 'User'}
@@ -50,19 +84,38 @@ export default function Navbar() {
                       {session.user.name?.split(' ')[0] || 'User'}
                     </p>
                   </div>
-                </div>
-                
-                {/* Simple Logout Button */}
-                <button
-                  onClick={() => signOut()}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
-                  title="Logout"
-                >
-                  <LogOut size={18} />
+                  <ChevronDown 
+                    size={16} 
+                    className={`text-slate-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
+                  />
                 </button>
-              </>
+
+                {/* Dropdown Menu */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-lg shadow-lg border border-slate-700 py-1 z-50">
+                    {/* User Info */}
+                    <div className="px-4 py-3 border-b border-slate-700">
+                      <p className="text-sm font-medium text-white">
+                        {session.user.name || 'User'}
+                      </p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {session.user.email}
+                      </p>
+                    </div>
+                    
+                    {/* Logout Button */}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors duration-200"
+                    >
+                      <LogOut size={16} />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
-              /* Simple Login Button */
+              /* Login Button */
               <button
                 onClick={() => signIn('google')}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"

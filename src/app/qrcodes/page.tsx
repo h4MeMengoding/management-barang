@@ -280,7 +280,7 @@ export default function QRCodesPage() {
                 </button>
                 
                 <div className="bg-green-900/20 border border-green-700/30 rounded-lg p-6">
-                  <h3 className="text-green-300 font-medium mb-3">✅ Setelah Generate</h3>
+                  <h3 className="text-green-300 font-medium mb-3">INFORMASI</h3>
                   <p className="text-green-200 text-sm mb-3">
                     Setelah berhasil generate QR codes, silakan buka menu &quot;Kelola QR Codes&quot; untuk melihat, mendownload, dan mengelola QR codes yang telah dibuat.
                   </p>
