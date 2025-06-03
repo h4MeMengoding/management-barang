@@ -31,9 +31,110 @@ export default function QRScanner() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState<string>('');
   const [manualCode, setManualCode] = useState<string>('');
+  const [debugInfo, setDebugInfo] = useState<string>(''); // Add debug info state
+  const [successFeedback, setSuccessFeedback] = useState<boolean>(false); // Add success feedback
+  const [scanAttempts, setScanAttempts] = useState<number>(0); // Track scan attempts
+  const [isVideoReady, setIsVideoReady] = useState<boolean>(false); // Track video ready state
+  const [isVideoLoading, setIsVideoLoading] = useState<boolean>(false); // Track video loading state
+  const [initStartTime, setInitStartTime] = useState<number>(0); // Track initialization timing
+  const [scanStats, setScanStats] = useState({ successful: 0, failed: 0, totalTime: 0 }); // Track scanning statistics
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scanIntervalRef = useRef<number | null>(null); // Add interval ref for better control
+  const lastDetectionRef = useRef<string>(''); // Track last detection to avoid duplicates
+  const videoReadyTimeoutRef = useRef<number | null>(null); // Track video ready timeout
+  const streamRef = useRef<MediaStream | null>(null); // Track the stream separately
+  const scanningStateRef = useRef<boolean>(false); // Track scanning state reliably
+  const videoInitializedRef = useRef<boolean>(false); // Track if video was properly initialized
+  const frameStabilityRef = useRef<number>(0); // Track consecutive stable frames
+  const lastFrameDataRef = useRef<string>(''); // Track last frame data for stability check
+
+  // Enhanced video frame validation function
+  const validateVideoFrame = (video: HTMLVideoElement, canvas: HTMLCanvasElement): boolean => {
+    try {
+      // Basic video state validation
+      if (!video.videoWidth || !video.videoHeight) return false;
+      if (video.readyState < video.HAVE_CURRENT_DATA) return false;
+      if (video.paused || video.ended) return false;
+      
+      const context = canvas.getContext('2d');
+      if (!context) return false;
+      
+      // Set canvas size to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw current frame
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Get image data to validate frame content
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // Check if we have actual image data (not all black/empty)
+      let nonBlackPixels = 0;
+      let totalLuminance = 0;
+      const sampleRate = 100; // Sample every 100th pixel for performance
+      
+      for (let i = 0; i < data.length; i += 4 * sampleRate) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        
+        // Calculate luminance
+        const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+        totalLuminance += luminance;
+        
+        // Count non-black pixels
+        if (r > 10 || g > 10 || b > 10) {
+          nonBlackPixels++;
+        }
+      }
+      
+      const sampledPixels = Math.floor(data.length / (4 * sampleRate));
+      const averageLuminance = totalLuminance / sampledPixels;
+      const nonBlackRatio = nonBlackPixels / sampledPixels;
+      
+      // Frame is valid if:
+      // 1. We have sufficient non-black pixels (> 20%)
+      // 2. Average luminance is reasonable (not too dark or too bright)
+      // 3. There's some variation in the image
+      const hasContent = nonBlackRatio > 0.2;
+      const hasReasonableLuminance = averageLuminance > 10 && averageLuminance < 240;
+      const hasVariation = nonBlackPixels > 10;
+      
+      // Check frame stability by comparing with last frame
+      const currentFrameHash = `${averageLuminance.toFixed(1)}-${nonBlackRatio.toFixed(3)}`;
+      const isChanging = currentFrameHash !== lastFrameDataRef.current;
+      
+      if (isChanging) {
+        frameStabilityRef.current = 0;
+        lastFrameDataRef.current = currentFrameHash;
+      } else {
+        frameStabilityRef.current++;
+      }
+      
+      // Consider frame frozen if it hasn't changed for too many checks
+      const isNotFrozen = frameStabilityRef.current < 10;
+      
+      console.log('Frame validation:', {
+        hasContent,
+        hasReasonableLuminance,
+        hasVariation,
+        isNotFrozen,
+        averageLuminance: averageLuminance.toFixed(1),
+        nonBlackRatio: nonBlackRatio.toFixed(3),
+        frameStability: frameStabilityRef.current
+      });
+      
+      return hasContent && hasReasonableLuminance && hasVariation && isNotFrozen;
+      
+    } catch (error) {
+      console.error('Error validating video frame:', error);
+      return false;
+    }
+  };
 
   const checkCameraPermissions = async () => {
     try {
@@ -62,6 +163,30 @@ export default function QRScanner() {
     try {
       setError('');
       setScanning(true);
+      setIsVideoReady(false);
+      setIsVideoLoading(true); // Set loading state
+      setScanAttempts(0);
+      lastDetectionRef.current = '';
+      scanningStateRef.current = true;
+      videoInitializedRef.current = false;
+      setInitStartTime(Date.now()); // Start time for initialization
+      
+      // Clear any existing timeouts and intervals
+      if (videoReadyTimeoutRef.current) {
+        clearTimeout(videoReadyTimeoutRef.current);
+        videoReadyTimeoutRef.current = null;
+      }
+      
+      if (scanIntervalRef.current) {
+        clearTimeout(scanIntervalRef.current);
+        scanIntervalRef.current = null;
+      }
+      
+      // Stop any existing stream first
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
       
       // Check secure context first
       if (!checkSecureContext()) {
@@ -80,34 +205,253 @@ export default function QRScanner() {
         throw new Error('Akses kamera ditolak. Silakan enable permission kamera di browser settings dan refresh halaman.');
       }
 
-      // Try to get camera access with fallback strategy
+      // Try to get camera access with fallback strategy and enhanced settings
       let stream: MediaStream;
       
       try {
-        // First try with environment camera (back camera on mobile)
+        // First try with environment camera (back camera on mobile) with optimized resolution for QR scanning
         stream = await navigator.mediaDevices.getUserMedia({
           video: { 
             facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            width: { ideal: 1280, min: 640 },
+            height: { ideal: 720, min: 480 },
+            aspectRatio: { ideal: 16/9 },
+            frameRate: { ideal: 30, min: 15 }
           },
         });
       } catch {
-        // Environment camera failed, trying default camera
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true
-        });
+        try {
+          // Fallback to user camera with optimized settings
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+              facingMode: 'user',
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 },
+              aspectRatio: { ideal: 16/9 },
+              frameRate: { ideal: 30, min: 15 }
+            },
+          });
+        } catch {
+          // Final fallback - basic camera access with good resolution
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 }
+            }
+          });
+        }
       }
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play();
-          scanFromCamera();
+      // Store stream reference
+      streamRef.current = stream;
+      
+      if (videoRef.current && scanningStateRef.current) {
+        const video = videoRef.current;
+        video.srcObject = stream;
+        
+        // Enhanced video initialization with proper event handling
+        const initializeVideo = () => {
+          return new Promise<void>((resolve, reject) => {
+            let resolved = false;
+            let timeoutId: number | null = null;
+            let retryCount = 0;
+            const maxRetries = 3;
+            
+            const validateVideoStream = () => {
+              // More thorough validation to ensure video is truly ready
+              if (!video.videoWidth || !video.videoHeight) return false;
+              if (video.readyState < video.HAVE_CURRENT_DATA) return false;
+              if (video.paused) return false;
+              
+              // Use the enhanced frame validation
+              const canvas = canvasRef.current;
+              if (!canvas) return false;
+              
+              return validateVideoFrame(video, canvas);
+            };
+            
+            const handleVideoReady = async () => {
+              if (resolved || !scanningStateRef.current) return;
+              
+              console.log('Video ready check:', {
+                readyState: video.readyState,
+                videoWidth: video.videoWidth,
+                videoHeight: video.videoHeight,
+                currentTime: video.currentTime,
+                paused: video.paused
+              });
+              
+              // Wait a bit more for the video to stabilize
+              await new Promise(resolve => setTimeout(resolve, 300));
+              
+              if (!scanningStateRef.current) return;
+              
+              // Validate video stream is actually working
+              if (validateVideoStream()) {
+                resolved = true;
+                videoInitializedRef.current = true;
+                setIsVideoLoading(false);
+                setIsVideoReady(true);
+                
+                // Track initialization performance
+                const initTime = Date.now() - initStartTime;
+                console.log(`Video fully initialized in ${initTime}ms, starting QR scanning...`);
+                setScanStats(prev => ({ ...prev, totalTime: initTime }));
+                
+                // Multiple delayed attempts to start scanning for better reliability
+                const startScanningWithRetry = (attempt = 0) => {
+                  setTimeout(() => {
+                    if (scanningStateRef.current && videoInitializedRef.current) {
+                      if (validateVideoStream()) {
+                        console.log(`Starting QR scanning attempt ${attempt + 1}...`);
+                        startQRScanning();
+                      } else if (attempt < 2) {
+                        console.log(`Video validation failed on attempt ${attempt + 1}, retrying...`);
+                        startScanningWithRetry(attempt + 1);
+                      } else {
+                        console.log('Video validation failed after multiple attempts');
+                      }
+                    }
+                  }, 200 * (attempt + 1)); // Increasing delay
+                };
+                
+                startScanningWithRetry();
+                resolve();
+              } else {
+                console.log('Video validation failed, video not ready yet');
+                if (retryCount < maxRetries) {
+                  retryCount++;
+                  console.log(`Retrying video initialization (${retryCount}/${maxRetries})...`);
+                  setTimeout(handleVideoReady, 500);
+                } else {
+                  reject(new Error('Video gagal divalidasi setelah beberapa percobaan'));
+                }
+              }
+            };
+            
+            const handlePlay = async () => {
+              console.log('Video play event triggered');
+              // Wait for video to actually start playing and provide frames
+              await new Promise(resolve => setTimeout(resolve, 500));
+              handleVideoReady();
+            };
+            
+            const handleLoadedData = () => {
+              console.log('Video loaded data event');
+              setTimeout(handleVideoReady, 200);
+            };
+            
+            const handleCanPlay = () => {
+              console.log('Video can play event');
+              if (!video.paused) {
+                handleVideoReady();
+              }
+            };
+            
+            // Set up event listeners with better error handling
+            const eventHandlers = {
+              loadedmetadata: async () => {
+                console.log('Video metadata loaded');
+                try {
+                  await video.play();
+                  console.log('Video play() succeeded');
+                  setTimeout(handleVideoReady, 300);
+                } catch (error) {
+                  console.error('Video play() failed:', error);
+                  reject(error);
+                }
+              },
+              playing: handlePlay,
+              loadeddata: handleLoadedData,
+              canplay: handleCanPlay
+            };
+            
+            // Clean up function
+            const cleanup = () => {
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+              }
+              Object.entries(eventHandlers).forEach(([event, handler]) => {
+                video.removeEventListener(event, handler);
+              });
+            };
+            
+            // Add event listeners
+            Object.entries(eventHandlers).forEach(([event, handler]) => {
+              video.addEventListener(event, handler, { once: true });
+            });
+            
+            // Enhanced fallback timeout with validation
+            timeoutId = window.setTimeout(async () => {
+              if (!resolved && scanningStateRef.current) {
+                console.log('Video initialization timeout, attempting force validation...');
+                
+                // Try to force video play if it's paused
+                if (video.paused) {
+                  try {
+                    await video.play();
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                  } catch (error) {
+                    console.error('Failed to force play video:', error);
+                  }
+                }
+                
+                if (validateVideoStream()) {
+                  resolved = true;
+                  videoInitializedRef.current = true;
+                  setIsVideoLoading(false);
+                  setIsVideoReady(true);
+                  console.log('Force validation succeeded, starting scanning...');
+                  startQRScanning();
+                  resolve();
+                } else {
+                  cleanup();
+                  reject(new Error('Video tidak dapat diinisialisasi dalam waktu yang ditentukan'));
+                }
+              }
+            }, 8000); // Extended timeout
+            
+            // Ensure cleanup on resolve/reject
+            const originalResolve = resolve;
+            const originalReject = reject;
+            
+            resolve = (...args) => {
+              cleanup();
+              originalResolve(...args);
+            };
+            
+            reject = (...args) => {
+              cleanup();
+              originalReject(...args);
+            };
+            
+            // Start the process
+            console.log('Starting video load...');
+            video.load();
+          });
         };
+        
+        // Initialize video with error handling
+        await initializeVideo();
+        
+      } else {
+        throw new Error('Video element tidak tersedia atau scanning dihentikan');
       }
+      
     } catch (error: unknown) {
+      // Clean up on error
+      scanningStateRef.current = false;
       setScanning(false);
+      setIsVideoReady(false);
+      setIsVideoLoading(false); // Clear loading state
+      videoInitializedRef.current = false;
+      
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      
       console.error('Camera error:', error);
       
       const errorMessage = error instanceof Error ? error : new Error('Unknown camera error');
@@ -129,57 +473,253 @@ export default function QRScanner() {
   };
 
   const stopCamera = () => {
+    // Stop scanning state
+    scanningStateRef.current = false;
+    videoInitializedRef.current = false;
+    
     if (videoRef.current?.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
+    
+    // Stop stream ref as well
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    
+    // Clear scanning interval and reset states
+    if (scanIntervalRef.current) {
+      clearTimeout(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
+    
+    // Clear video ready timeout
+    if (videoReadyTimeoutRef.current) {
+      clearTimeout(videoReadyTimeoutRef.current);
+      videoReadyTimeoutRef.current = null;
+    }
+    
     setScanning(false);
+    setIsVideoReady(false);
+    setDebugInfo('');
+    setScanAttempts(0);
+    setSuccessFeedback(false);
+    lastDetectionRef.current = '';
+  };
+
+  const startQRScanning = () => {
+    // Only start if we're still in scanning state and video is ready
+    if (!scanningStateRef.current || !videoInitializedRef.current) {
+      console.log('Scanning cancelled or video not ready');
+      return;
+    }
+    
+    console.log('QR scanning started');
+    
+    // Add a small delay before starting to ensure video is truly stable
+    setTimeout(() => {
+      if (scanningStateRef.current && videoInitializedRef.current) {
+        scanFromCamera();
+      }
+    }, 300);
   };
 
   const scanFromCamera = () => {
+    // Double check scanning state
+    if (!scanningStateRef.current || !videoInitializedRef.current) {
+      console.log('Scanning stopped or video not initialized');
+      return;
+    }
+    
     const video = videoRef.current;
     const canvas = canvasRef.current;
     
-    if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
+    // Enhanced video readiness check
+    if (video && canvas && 
+        video.readyState >= video.HAVE_CURRENT_DATA && 
+        video.videoWidth > 0 && video.videoHeight > 0 &&
+        !video.paused && !video.ended) {
+      
       const context = canvas.getContext('2d');
       if (context) {
-        // Set canvas size to match video
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        // Draw video frame to canvas
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
+        try {
+          // Set canvas size to match video
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          
+          // Update debug info
+          setScanAttempts(prev => prev + 1);
+          setDebugInfo(`Video: ${video.videoWidth}x${video.videoHeight}, Ready: ${video.readyState}, Attempts: ${scanAttempts + 1}`);
+          
+          // Draw video frame to canvas
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          // Verify we got actual image data
           const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
           
-          // Try to detect QR code with improved settings
-          const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "attemptBoth", // Try both normal and inverted image for better detection
-          });
-        
-          if (code) {
-            // Draw a green box around the QR code to give visual feedback
-            if (context && code.location) {
-              context.strokeStyle = '#00FF00';
-              context.lineWidth = 5;
-              context.beginPath();
-              context.moveTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
-              context.lineTo(code.location.topRightCorner.x, code.location.topRightCorner.y);
-              context.lineTo(code.location.bottomRightCorner.x, code.location.bottomRightCorner.y);
-              context.lineTo(code.location.bottomLeftCorner.x, code.location.bottomLeftCorner.y);
-              context.lineTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
-              context.stroke();
-            }
+          // Quick check if we have actual video data (not a black frame)
+          const hasVideoData = imageData.data.some((value, index) => 
+            index % 4 !== 3 && value > 10 // Skip alpha channel, check if RGB values are meaningful
+          );
           
-            handleQRCodeDetected(code.data);
+          if (!hasVideoData) {
+            setDebugInfo(`Video frame is empty or black, skipping scan attempt ${scanAttempts + 1}`);
+            scheduleNextScan();
             return;
           }
+          
+          // Enhanced QR code detection with multiple attempts
+          let code = null;
+          
+          // First attempt: Normal detection with high settings
+          code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth",
+          });
+          
+          // Second attempt: Try with lower resolution for better performance on smaller QR codes
+          if (!code && canvas.width > 640) {
+            const scaleFactor = 640 / canvas.width;
+            const scaledWidth = Math.floor(canvas.width * scaleFactor);
+            const scaledHeight = Math.floor(canvas.height * scaleFactor);
+            
+            // Create a temporary canvas for scaled down image
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = scaledWidth;
+            tempCanvas.height = scaledHeight;
+            const tempContext = tempCanvas.getContext('2d');
+            
+            if (tempContext) {
+              tempContext.drawImage(video, 0, 0, scaledWidth, scaledHeight);
+              const scaledImageData = tempContext.getImageData(0, 0, scaledWidth, scaledHeight);
+              
+              code = jsQR(scaledImageData.data, scaledImageData.width, scaledImageData.height, {
+                inversionAttempts: "attemptBoth",
+              });
+            }
+          }
+          
+          // Third attempt: Try cropping center region for better focus
+          if (!code) {
+            const cropSize = Math.min(canvas.width, canvas.height) * 0.7;
+            const cropX = (canvas.width - cropSize) / 2;
+            const cropY = (canvas.height - cropSize) / 2;
+            
+            const croppedImageData = context.getImageData(cropX, cropY, cropSize, cropSize);
+            
+            code = jsQR(croppedImageData.data, croppedImageData.width, croppedImageData.height, {
+              inversionAttempts: "attemptBoth",
+            });
+          }
+
+          // Fourth attempt: Try with enhanced contrast for difficult lighting conditions
+          if (!code) {
+            const enhancedImageData = context.createImageData(imageData.width, imageData.height);
+            const originalData = imageData.data;
+            const enhancedData = enhancedImageData.data;
+            
+            // Apply adaptive contrast enhancement
+            for (let i = 0; i < originalData.length; i += 4) {
+              const gray = (originalData[i] + originalData[i + 1] + originalData[i + 2]) / 3;
+              
+              // Enhanced contrast with better threshold
+              let enhanced;
+              if (gray < 64) {
+                enhanced = 0;   // Very dark pixels become black
+              } else if (gray > 192) {
+                enhanced = 255; // Very light pixels become white
+              } else {
+                // Apply more aggressive contrast to middle range
+                enhanced = gray < 128 ? 0 : 255;
+              }
+              
+              enhancedData[i] = enhanced;     // Red
+              enhancedData[i + 1] = enhanced; // Green
+              enhancedData[i + 2] = enhanced; // Blue
+              enhancedData[i + 3] = 255;      // Alpha
+            }
+            
+            code = jsQR(enhancedData, enhancedImageData.width, enhancedImageData.height, {
+              inversionAttempts: "attemptBoth",
+            });
+          }
+        
+          if (code && code.data) {
+            console.log('QR Code detected:', code.data); // Debug log
+            
+            // Validate that we have a proper QR code data
+            const trimmedData = code.data.trim();
+            
+            // Prevent duplicate detections
+            if (trimmedData === lastDetectionRef.current) {
+              setDebugInfo(`Duplicate QR detected, skipping: "${trimmedData}"`);
+              scheduleNextScan();
+              return;
+            }
+            
+            // Accept any QR code data that looks valid (not empty and reasonable length)
+            if (trimmedData && trimmedData.length >= 4 && trimmedData.length <= 50) {
+              // Store last detection to prevent duplicates
+              lastDetectionRef.current = trimmedData;
+              
+              // Show success feedback
+              setSuccessFeedback(true);
+              setTimeout(() => setSuccessFeedback(false), 2000);
+              
+              // Draw a green box around the QR code to give visual feedback
+              if (context && code.location) {
+                context.strokeStyle = '#00FF00';
+                context.lineWidth = 5;
+                context.beginPath();
+                context.moveTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
+                context.lineTo(code.location.topRightCorner.x, code.location.topRightCorner.y);
+                context.lineTo(code.location.bottomRightCorner.x, code.location.bottomRightCorner.y);
+                context.lineTo(code.location.bottomLeftCorner.x, code.location.bottomLeftCorner.y);
+                context.lineTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
+                context.stroke();
+                
+                // Add a success indicator text
+                context.fillStyle = '#00FF00';
+                context.font = 'bold 24px sans-serif';
+                context.fillText('✓ QR Detected!', code.location.topLeftCorner.x, code.location.topLeftCorner.y - 10);
+              }
+            
+              // Process the detected QR code data
+              setScanStats(prev => ({ ...prev, successful: prev.successful + 1 }));
+              handleQRCodeDetected(trimmedData);
+              return;
+            } else {
+              // Update debug info for invalid QR codes
+              setScanStats(prev => ({ ...prev, failed: prev.failed + 1 }));
+              setDebugInfo(`QR detected but invalid format: "${trimmedData}" (length: ${trimmedData.length})`);
+            }
+          } else {
+            // Update scan status for debugging
+            setDebugInfo(`Scanning... Frame ${scanAttempts + 1}, Video: ${video.videoWidth}x${video.videoHeight}`);
+          }
+        } catch (error) {
+          console.error('Error during QR detection:', error);
+          setDebugInfo(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+    } else {
+      // Update debug info when video isn't ready
+      if (video) {
+        setDebugInfo(`Video not ready. State: ${video.readyState}, Size: ${video.videoWidth}x${video.videoHeight}`);
+      } else {
+        setDebugInfo('Video ref not available');
       }
     }
     
-    if (scanning) {
-      requestAnimationFrame(scanFromCamera);
+    scheduleNextScan();
+  };
+
+  // Helper function to schedule next scan
+  const scheduleNextScan = () => {
+    if (scanningStateRef.current && videoInitializedRef.current) {
+      // Use a reasonable interval to balance performance and responsiveness
+      scanIntervalRef.current = window.setTimeout(scanFromCamera, 150);
     }
   };
 
@@ -205,16 +745,72 @@ export default function QRScanner() {
               try {
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                 
-                // Try with enhanced options to improve detection success rate
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                  inversionAttempts: "attemptBoth" // Try both normal and inverted image
+                // Enhanced QR detection for uploaded images with multiple attempts
+                let code = null;
+                
+                // First attempt: Normal detection
+                code = jsQR(imageData.data, imageData.width, imageData.height, {
+                  inversionAttempts: "attemptBoth"
                 });
                 
-                if (code) {
-                  setError(''); // Clear error message
-                  handleQRCodeDetected(code.data);
+                // Second attempt: Try with different scaling if original fails
+                if (!code) {
+                  // Try scaling the image for better detection
+                  const scaledCanvas = document.createElement('canvas');
+                  const scaledContext = scaledCanvas.getContext('2d');
+                  
+                  if (scaledContext) {
+                    // Scale to a standardized size for better QR detection
+                    const targetSize = 800;
+                    scaledCanvas.width = targetSize;
+                    scaledCanvas.height = targetSize;
+                    
+                    scaledContext.drawImage(htmlImg, 0, 0, targetSize, targetSize);
+                    const scaledImageData = scaledContext.getImageData(0, 0, targetSize, targetSize);
+                    
+                    code = jsQR(scaledImageData.data, scaledImageData.width, scaledImageData.height, {
+                      inversionAttempts: "attemptBoth"
+                    });
+                  }
+                }
+                
+                // Third attempt: Try with edge enhancement
+                if (!code) {
+                  // Apply simple contrast enhancement
+                  const enhancedImageData = context.createImageData(imageData.width, imageData.height);
+                  const originalData = imageData.data;
+                  const enhancedData = enhancedImageData.data;
+                  
+                  for (let i = 0; i < originalData.length; i += 4) {
+                    // Convert to grayscale and enhance contrast
+                    const gray = (originalData[i] + originalData[i + 1] + originalData[i + 2]) / 3;
+                    const enhanced = gray > 128 ? 255 : 0; // High contrast black and white
+                    
+                    enhancedData[i] = enhanced;     // Red
+                    enhancedData[i + 1] = enhanced; // Green
+                    enhancedData[i + 2] = enhanced; // Blue
+                    enhancedData[i + 3] = 255;      // Alpha
+                  }
+                  
+                  code = jsQR(enhancedData, enhancedImageData.width, enhancedImageData.height, {
+                    inversionAttempts: "attemptBoth"
+                  });
+                }
+                
+                if (code && code.data) {
+                  console.log('QR Code detected from image:', code.data); // Debug log
+                  
+                  // Validate the detected data - accept any reasonable QR code
+                  const trimmedData = code.data.trim();
+                  
+                  if (trimmedData && trimmedData.length >= 4 && trimmedData.length <= 50) {
+                    setError(''); // Clear error message
+                    handleQRCodeDetected(trimmedData);
+                  } else {
+                    setError(`QR Code terdeteksi tapi format tidak valid: "${trimmedData}". Pastikan QR code berisi data yang valid.`);
+                  }
                 } else {
-                  setError('QR Code tidak ditemukan dalam gambar. Pastikan gambar jelas dan QR code terlihat.');
+                  setError('QR Code tidak ditemukan dalam gambar. Pastikan:\n• Gambar jelas dan QR code terlihat dengan baik\n• QR code tidak terpotong\n• Pencahayaan gambar cukup\n• QR code berukuran cukup besar dalam gambar');
                 }
               } catch (err) {
                 console.error("Error processing image:", err);
@@ -223,8 +819,18 @@ export default function QRScanner() {
             }
           }
         };
+        
+        htmlImg.onerror = () => {
+          setError('Gagal memuat gambar. Pastikan file yang dipilih adalah gambar yang valid.');
+        };
+        
         htmlImg.src = e.target?.result as string;
       };
+      
+      reader.onerror = () => {
+        setError('Gagal membaca file. Coba pilih file gambar lain.');
+      };
+      
       reader.readAsDataURL(file);
     }
   };
@@ -233,8 +839,11 @@ export default function QRScanner() {
     try {
       setError('');
       
+      // Clean and validate the QR data
+      const cleanedData = qrData.trim();
+      console.log('Processing QR data:', cleanedData); // Debug log
+      
       // Show processing message without stopping camera immediately
-      // This gives visual feedback that the QR was detected
       setError('QR Code terdeteksi. Memproses...');
       
       const response = await fetch('/api/scan', {
@@ -242,19 +851,15 @@ export default function QRScanner() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ qrData }),
+        body: JSON.stringify({ qrData: cleanedData }),
       });
 
-      // Now that we have a response, stop the camera
-      stopCamera();
-      
-      // Show processing indicator
-      setScanResult(null);
-      setScanning(false);
-      
       const result = await response.json();
       
       if (response.ok) {
+        // Now that we have a successful response, stop the camera
+        stopCamera();
+        
         if (result.type === 'initialize_locker') {
           // Redirect to initialization page for unused QR code
           const params = new URLSearchParams({
@@ -266,27 +871,27 @@ export default function QRScanner() {
           // Show existing locker details
           setScanResult(result);
           setError('');
-        }        } else {
-          // Provide detailed error feedback
-          if (result.error) {
-          setError(`${result.error}`);
-        } else if (qrData.includes('qrcode:') || qrData.includes('locker:')) {
-          setError(`QR Code tidak valid (Format: ${qrData.split(':')[0]})`);
-        } else if (qrData.length > 20) {
-          setError(`QR Code tidak valid. Format tidak sesuai: "${qrData.substring(0, 20)}..."`);
+        }
+      } else {
+        // Stop camera on error as well
+        stopCamera();
+        
+        // Provide detailed error feedback
+        if (result.error) {
+          setError(`${result.error}\n\nData QR yang terdeteksi: "${cleanedData}"`);
         } else {
-          setError(`QR Code tidak valid. Format tidak sesuai: "${qrData}"`);
+          setError(`QR Code tidak valid. Data yang terdeteksi: "${cleanedData}"`);
         }
         
-        // Add a retry button through re-enabling the scanning
+        // Add a retry instruction with specific debugging info
         setTimeout(() => {
-          setError(prevError => prevError + "\n\nSilakan coba scan lagi atau gunakan QR code yang berbeda.");
+          setError(prevError => prevError + `\n\nSilakan coba scan lagi atau gunakan input manual dengan kode 4 digit.`);
         }, 2000);
       }
     } catch (err) {
       stopCamera();
       console.error("Error in QR code processing:", err);
-      setError('Terjadi kesalahan saat memproses QR Code. Silakan coba lagi.');
+      setError(`Terjadi kesalahan saat memproses QR Code: ${err instanceof Error ? err.message : 'Unknown error'}\n\nData QR: "${qrData}"`);
     }
   };
 
@@ -543,17 +1148,62 @@ export default function QRScanner() {
                 />
                 {/* Scanning animation overlay */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <div className="w-64 h-64 sm:w-72 sm:h-72 border-2 border-blue-500 rounded-lg relative qr-scan-guide">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 opacity-70 animate-scan"></div>
+                  {/* Loading overlay when video is initializing */}
+                  {isVideoLoading && (
+                    <div className="absolute inset-0 bg-gray-900/80 flex flex-col items-center justify-center z-10">
+                      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mb-4"></div>
+                      <p className="text-blue-300 text-lg font-medium">Menginisialisasi kamera...</p>
+                      <p className="text-gray-400 text-sm mt-2">Mohon tunggu sebentar</p>
+                    </div>
+                  )}
+                  
+                  <div className={`w-64 h-64 sm:w-72 sm:h-72 border-2 rounded-lg relative qr-scan-guide transition-all duration-300 ${
+                    successFeedback ? 'border-green-500 scale-110' : 'border-blue-500'
+                  }`}>
+                    {!successFeedback && !isVideoLoading && (
+                      <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 opacity-70 animate-scan"></div>
+                    )}
+                    
+                    {/* Success checkmark */}
+                    {successFeedback && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
+                          <span className="text-white text-2xl font-bold">✓</span>
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* Corner markers for better visual guidance */}
-                    <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl"></div>
-                    <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr"></div>
-                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl"></div>
-                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br"></div>
+                    <div className={`absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl transition-colors duration-300 ${
+                      successFeedback ? 'border-green-500' : 'border-blue-500'
+                    }`}></div>
+                    <div className={`absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr transition-colors duration-300 ${
+                      successFeedback ? 'border-green-500' : 'border-blue-500'
+                    }`}></div>
+                    <div className={`absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl transition-colors duration-300 ${
+                      successFeedback ? 'border-green-500' : 'border-blue-500'
+                    }`}></div>
+                    <div className={`absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 rounded-br transition-colors duration-300 ${
+                      successFeedback ? 'border-green-500' : 'border-blue-500'
+                    }`}></div>
                   </div>
-                  <p className="mt-4 text-blue-300 text-sm font-medium bg-slate-900/80 px-4 py-2 rounded-full">
-                    Scanning... Arahkan ke QR Code
-                  </p>
+                  
+                  {!isVideoLoading && (
+                    <p className={`mt-4 text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 ${
+                      successFeedback 
+                        ? 'text-green-300 bg-green-900/80' 
+                        : isVideoReady 
+                          ? 'text-blue-300 bg-slate-900/80'
+                          : 'text-yellow-300 bg-yellow-900/80'
+                    }`}>
+                      {successFeedback 
+                        ? '✓ QR Code Terdeteksi!' 
+                        : isVideoReady 
+                          ? 'Scanning... Arahkan ke QR Code'
+                          : 'Menunggu kamera siap...'
+                      }
+                    </p>
+                  )}
                 </div>
               </div>
               <button
@@ -562,14 +1212,84 @@ export default function QRScanner() {
               >
                 Stop Scanning
               </button>
-              <div className="bg-slate-800/40 border border-slate-700/30 rounded-lg p-4 mt-4">
-                <h4 className="text-blue-400 font-medium mb-2">Tips untuk Scan QR Code:</h4>
-                <ul className="text-gray-300 text-sm space-y-1 list-disc list-inside">
-                  <li>Pastikan QR code berada dalam kotak panduan</li>
-                  <li>Jaga kamera tetap stabil dan fokus</li>
-                  <li>Pastikan QR code mendapat pencahayaan yang cukup</li>
-                  <li>Jika gagal, coba masukkan kode 4 digit secara manual</li>
-                </ul>
+              
+              {/* Performance feedback */}
+              <div className="bg-slate-800/40 border border-slate-700/30 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-blue-400 font-medium">Status Scanning:</h4>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    scanAttempts > 0 ? 'bg-green-900/50 text-green-300' : 'bg-gray-700 text-gray-400'
+                  }`}>
+                    {scanAttempts > 0 ? `${scanAttempts} attempts` : 'Waiting...'}
+                  </span>
+                </div>
+                
+                {/* Performance stats */}
+                {(scanStats.successful > 0 || scanStats.failed > 0 || scanStats.totalTime > 0) && (
+                  <div className="mb-3 p-2 bg-slate-900/40 rounded text-xs">
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <div className="text-green-400 font-medium">{scanStats.successful}</div>
+                        <div className="text-gray-400">Success</div>
+                      </div>
+                      <div>
+                        <div className="text-red-400 font-medium">{scanStats.failed}</div>
+                        <div className="text-gray-400">Failed</div>
+                      </div>
+                      <div>
+                        <div className="text-blue-400 font-medium">{scanStats.totalTime}ms</div>
+                        <div className="text-gray-400">Init Time</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="mb-3">
+                  <h4 className="text-blue-400 font-medium mb-2">Tips untuk Scan QR Code:</h4>
+                  <ul className="text-gray-300 text-sm space-y-1 list-disc list-inside">
+                    <li>Pastikan QR code berada dalam kotak panduan</li>
+                    <li>Jaga kamera tetap stabil dan fokus</li>
+                    <li>Pastikan QR code mendapat pencahayaan yang cukup</li>
+                    <li>Jarak ideal: 15-30 cm dari QR code</li>
+                    {scanAttempts > 30 && (
+                      <li className="text-yellow-400 font-medium">
+                        ⚠️ Coba ubah sudut atau pencahayaan, atau gunakan input manual
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                
+                {/* Debug info panel */}
+                {debugInfo && (
+                  <div className="mt-3 p-2 bg-gray-900/50 border border-gray-600 rounded text-xs text-gray-400">
+                    <strong>Debug:</strong> {debugInfo}
+                  </div>
+                )}
+                
+                {/* Show manual input option after many failed attempts */}
+                {scanAttempts > 50 && (
+                  <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg">
+                    <h5 className="text-yellow-400 font-medium mb-2">🔄 Scan Berulang Kali?</h5>
+                    <p className="text-yellow-200 text-sm mb-3">
+                      Sepertinya QR code sulit dideteksi. Coba input manual untuk hasil lebih cepat.
+                    </p>
+                    <button
+                      onClick={() => {
+                        stopCamera();
+                        // Focus on manual input after stopping camera
+                        setTimeout(() => {
+                          const manualInput = document.getElementById('manualCode') as HTMLInputElement;
+                          if (manualInput) {
+                            manualInput.focus();
+                          }
+                        }, 500);
+                      }}
+                      className="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      Beralih ke Input Manual
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

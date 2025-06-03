@@ -3,8 +3,9 @@ import { createCanvas, loadImage } from 'canvas';
 
 export async function generateQRCodeWithOverlay(code: string): Promise<string> {
   try {
-    // Generate QR code as buffer first
-    const qrCodeBuffer = await QRCodeLib.toBuffer(code, {
+    // Generate QR code as buffer first - encode with qrcode: prefix for better detection
+    const qrCodeData = `qrcode:${code}`;
+    const qrCodeBuffer = await QRCodeLib.toBuffer(qrCodeData, {
       width: 600,
       margin: 6,
       errorCorrectionLevel: 'H', // High error correction allows for center overlay
