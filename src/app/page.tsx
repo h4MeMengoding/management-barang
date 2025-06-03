@@ -255,7 +255,7 @@ export default function Home() {
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="dark-stat">
             <div className="flex items-center">
               <div className="dark-icon">
@@ -274,6 +274,17 @@ export default function Home() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-400">Total Barang</p>
+                <p className="text-3xl font-bold text-gray-100">{items.reduce((total, item) => total + item.quantity, 0)}</p>
+              </div>
+            </div>
+          </div>
+          <div className="dark-stat">
+            <div className="flex items-center">
+              <div className="dark-icon">
+                <Tag className="h-6 w-6 text-orange-500" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-400">Jenis Barang</p>
                 <p className="text-3xl font-bold text-gray-100">{items.length}</p>
               </div>
             </div>
@@ -434,7 +445,7 @@ export default function Home() {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-400 font-medium flex items-center space-x-2">
                       <Package size={16} />
-                      <span>{lockerItems.length} barang</span>
+                      <span>{lockerItems.reduce((total, item) => total + item.quantity, 0)} barang</span>
                     </span>
                     <div className="flex items-center space-x-2">
                       <div className="dark-icon p-2 group-hover:scale-110 transition-transform duration-200">
@@ -514,7 +525,7 @@ export default function Home() {
                   ) : itemSearchResults.length > 0 ? (
                     <div className="space-y-4">
                       <p className="text-sm text-gray-400 mb-4">
-                        Ditemukan {itemSearchResults.length} barang
+                        Ditemukan {itemSearchResults.reduce((total, item) => total + item.quantity, 0)} barang ({itemSearchResults.length} jenis)
                       </p>
                       {itemSearchResults.map((item) => {
                         const lockerInfo = getLockerInfo(item.lockerId);

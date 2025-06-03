@@ -278,7 +278,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
             <div className="dark-card p-6">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
                 <h2 className="text-lg font-semibold text-gray-200">
-                  Daftar Barang ({items.length})
+                  Daftar Barang ({items.reduce((total, item) => total + item.quantity, 0)})
                 </h2>
                 <button
                   onClick={() => router.push('/items/new')}
