@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     default: "Management Barang",
     template: "%s | Management Barang"
   },
-  description: "Sistem manajemen barang dengan QR Code untuk organisasi yang lebih baik. Kelola item, loker, dan tracking dengan mudah.",
+  description: "Sistem manajemen barang dengan QR Code. Organize barangmu sekarang. Kelola item, loker, dan tracking dengan mudah.",
   keywords: [
     "management barang",
     "inventory management", 
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     url: process.env.NEXTAUTH_URL || "https://management-barang.vercel.app",
     siteName: "Management Barang",
     title: "Management Barang - Sistem Manajemen dengan QR Code",
-    description: "Sistem manajemen barang dengan QR Code untuk organisasi yang lebih baik. Kelola item, loker, dan tracking dengan mudah.",
+    description: "Sistem manajemen barang dengan QR Code. Organize barangmu sekarang. Kelola item, loker, dan tracking dengan mudah.",
     images: [
       {
         url: "/og-images/og-image.png",
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
     site: "@managementbarang",
     creator: "@managementbarang",
     title: "Management Barang - Sistem Manajemen dengan QR Code",
-    description: "Sistem manajemen barang dengan QR Code untuk organisasi yang lebih baik.",
+    description: "Sistem manajemen barang dengan QR Code. Organize barangmu sekarang.",
     images: [
       {
         url: "/twitter-images/twitter-image.png",
