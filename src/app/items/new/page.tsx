@@ -19,6 +19,7 @@ export default function NewItem() {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
   const [lockers, setLockers] = useState<Locker[]>([]);
+  const [preselectedLockerId, setPreselectedLockerId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -30,6 +31,18 @@ export default function NewItem() {
   useEffect(() => {
     if (session) {
       fetchLockers();
+      
+      // Get the lockerId from URL parameters if available
+      const queryParams = new URLSearchParams(window.location.search);
+      const lockerId = queryParams.get('lockerId');
+      
+      if (lockerId) {
+        setPreselectedLockerId(lockerId);
+        setFormData(prev => ({
+          ...prev,
+          lockerId
+        }));
+      }
     }
   }, [session]);
 
@@ -186,21 +199,28 @@ export default function NewItem() {
                 <label htmlFor="lockerId" className="block text-sm font-medium text-gray-300 mb-3">
                   Loker *
                 </label>
-                <select
-                  id="lockerId"
-                  name="lockerId"
-                  required
-                  value={formData.lockerId}
-                  onChange={handleChange}
-                  className="w-full dark-input text-gray-200"
-                >
-                  <option value="">Pilih Loker</option>
-                  {lockers.map((locker) => (
-                    <option key={locker._id} value={locker._id}>
-                      {locker.code} - {locker.label}
-                    </option>
-                  ))}
-                </select>
+                {preselectedLockerId ? (
+                  <div className="w-full dark-input text-gray-200 bg-gray-700 cursor-not-allowed p-2">
+                    {lockers.find(locker => locker._id === preselectedLockerId)?.code} - {lockers.find(locker => locker._id === preselectedLockerId)?.label}
+                    <input type="hidden" name="lockerId" value={formData.lockerId} />
+                  </div>
+                ) : (
+                  <select
+                    id="lockerId"
+                    name="lockerId"
+                    required
+                    value={formData.lockerId}
+                    onChange={handleChange}
+                    className="w-full dark-input text-gray-200"
+                  >
+                    <option value="">Pilih Loker</option>
+                    {lockers.map((locker) => (
+                      <option key={locker._id} value={locker._id}>
+                        {locker.code} - {locker.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div>

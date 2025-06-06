@@ -281,7 +281,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
                   Daftar Barang ({items.reduce((total, item) => total + item.quantity, 0)})
                 </h2>
                 <button
-                  onClick={() => router.push('/items/new')}
+                  onClick={() => router.push(`/items/new?lockerId=${lockerId}`)}
                   className="flex items-center space-x-2 px-4 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200"
                 >
                   <Plus size={20} />
@@ -295,7 +295,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
                   <h3 className="text-xl font-medium text-gray-200 mb-2">Belum ada barang</h3>
                   <p className="text-gray-400 mb-6">Loker ini belum memiliki barang. Mulai tambahkan barang pertama.</p>
                   <button
-                    onClick={() => router.push('/items/new')}
+                    onClick={() => router.push(`/items/new?lockerId=${lockerId}`)}
                     className="inline-flex items-center space-x-2 px-6 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200"
                   >
                     <Plus size={20} />
