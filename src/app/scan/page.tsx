@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ArrowLeft, Camera, Upload, Package } from 'lucide-react';
+import { ArrowLeft, Camera, Upload, Package, FileImage } from 'lucide-react';
 import Image from 'next/image';
 import jsQR from 'jsqr';
 
@@ -31,6 +31,7 @@ export default function QRScanner() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState<string>('');
   const [manualCode, setManualCode] = useState<string>('');
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const [debugInfo, setDebugInfo] = useState<string>(''); // Add debug info state
   const [successFeedback, setSuccessFeedback] = useState<boolean>(false); // Add success feedback
   const [scanAttempts, setScanAttempts] = useState<number>(0); // Track scan attempts
@@ -41,6 +42,7 @@ export default function QRScanner() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
   const scanIntervalRef = useRef<number | null>(null); // Add interval ref for better control
   const lastDetectionRef = useRef<string>(''); // Track last detection to avoid duplicates
   const videoReadyTimeoutRef = useRef<number | null>(null); // Track video ready timeout
@@ -723,6 +725,150 @@ export default function QRScanner() {
     }
   };
 
+  const processDroppedFile = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      // Show loading message
+      setError('Memproses gambar, mohon tunggu...');
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const htmlImg = new window.Image();
+        htmlImg.onload = () => {
+          const canvas = canvasRef.current;
+          if (canvas) {
+            const context = canvas.getContext('2d');
+            if (context) {
+              // Set canvas size to match image
+              canvas.width = htmlImg.width;
+              canvas.height = htmlImg.height;
+              context.drawImage(htmlImg, 0, 0);
+              
+              try {
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // Enhanced QR detection for uploaded images with multiple attempts
+                let code = null;
+                
+                // First attempt: Normal detection
+                code = jsQR(imageData.data, imageData.width, imageData.height, {
+                  inversionAttempts: "attemptBoth"
+                });
+                
+                // Second attempt: Try with different scaling if original fails
+                if (!code) {
+                  // Try scaling the image for better detection
+                  const scaledCanvas = document.createElement('canvas');
+                  const scaledContext = scaledCanvas.getContext('2d');
+                  
+                  if (scaledContext) {
+                    // Scale to a standardized size for better QR detection
+                    const targetSize = 800;
+                    scaledCanvas.width = targetSize;
+                    scaledCanvas.height = targetSize;
+                    
+                    scaledContext.drawImage(htmlImg, 0, 0, targetSize, targetSize);
+                    const scaledImageData = scaledContext.getImageData(0, 0, targetSize, targetSize);
+                    
+                    code = jsQR(scaledImageData.data, scaledImageData.width, scaledImageData.height, {
+                      inversionAttempts: "attemptBoth"
+                    });
+                  }
+                }
+                
+                // Third attempt: Try with edge enhancement
+                if (!code) {
+                  // Apply simple contrast enhancement
+                  const enhancedImageData = context.createImageData(imageData.width, imageData.height);
+                  const originalData = imageData.data;
+                  const enhancedData = enhancedImageData.data;
+                  
+                  for (let i = 0; i < originalData.length; i += 4) {
+                    // Convert to grayscale and enhance contrast
+                    const gray = (originalData[i] + originalData[i + 1] + originalData[i + 2]) / 3;
+                    const enhanced = gray > 128 ? 255 : 0; // High contrast black and white
+                    
+                    enhancedData[i] = enhanced;     // Red
+                    enhancedData[i + 1] = enhanced; // Green
+                    enhancedData[i + 2] = enhanced; // Blue
+                    enhancedData[i + 3] = 255;      // Alpha
+                  }
+                  
+                  code = jsQR(enhancedData, enhancedImageData.width, enhancedImageData.height, {
+                    inversionAttempts: "attemptBoth"
+                  });
+                }
+                
+                if (code && code.data) {
+                  console.log('QR Code detected from dropped image:', code.data);
+                  
+                  // Validate the detected data - accept any reasonable QR code
+                  const trimmedData = code.data.trim();
+                  
+                  if (trimmedData && trimmedData.length >= 4 && trimmedData.length <= 50) {
+                    setError(''); // Clear error message
+                    handleQRCodeDetected(trimmedData);
+                  } else {
+                    setError(`QR Code terdeteksi tapi format tidak valid: "${trimmedData}". Pastikan QR code berisi data yang valid.`);
+                  }
+                } else {
+                  setError('QR Code tidak ditemukan dalam gambar. Pastikan:\n• Gambar jelas dan QR code terlihat dengan baik\n• QR code tidak terpotong\n• Pencahayaan gambar cukup\n• QR code berukuran cukup besar dalam gambar');
+                }
+              } catch (err) {
+                console.error("Error processing dropped image:", err);
+                setError('Terjadi kesalahan saat memproses gambar. Coba gambar lain dengan kualitas lebih baik.');
+              }
+            }
+          }
+        };
+        
+        htmlImg.onerror = () => {
+          setError('Gagal memuat gambar. Pastikan file yang dipilih adalah gambar yang valid.');
+        };
+        
+        htmlImg.src = e.target?.result as string;
+      };
+      
+      reader.onerror = () => {
+        setError('Gagal membaca file. Coba pilih file gambar lain.');
+      };
+      
+      reader.readAsDataURL(file);
+    } else {
+      setError('Tipe file tidak didukung. Harap upload gambar (JPG, PNG, dll).');
+    }
+  };
+  
+  // Handle drag events for the drop zone
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const dt = e.dataTransfer;
+    if (dt.files && dt.files.length > 0) {
+      const file = dt.files[0]; // Take only the first file
+      processDroppedFile(file);
+    }
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -1077,13 +1223,36 @@ export default function QRScanner() {
                 onChange={handleFileUpload}
                 className="hidden"
               />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center space-x-2 px-6 py-4 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200"
+              
+              <div 
+                ref={dropZoneRef}
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-300 ${
+                  isDragging 
+                    ? 'border-blue-500 bg-blue-900/20' 
+                    : 'border-slate-600 hover:border-slate-400'
+                }`}
               >
-                <Upload size={20} />
-                <span>Upload Gambar QR Code</span>
-              </button>
+                <div className="flex flex-col items-center justify-center space-y-3">
+                  <FileImage size={40} className={`${isDragging ? 'text-blue-400' : 'text-gray-400'}`} />
+                  <div>
+                    <p className="text-gray-300 font-medium mb-1">
+                      {isDragging ? 'Lepas untuk Memproses' : 'Tarik & Lepas Gambar QR Code di Sini'}
+                    </p>
+                    <p className="text-xs text-gray-400">atau</p>
+                  </div>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200"
+                  >
+                    <Upload size={16} className="inline mr-2" />
+                    <span>Pilih File</span>
+                  </button>
+                </div>
+              </div>
               
               <div className="text-center text-gray-400 font-medium">atau</div>
               
