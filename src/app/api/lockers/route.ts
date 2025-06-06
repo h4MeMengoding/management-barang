@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions, isValidSession } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb';
-import { Locker, User } from '@/models';
-import QRCode from 'qrcode';
+import { Locker, User, QRCode as QRCodeModel } from '@/models';
+import { generateQRCodeWithOverlay } from '@/lib/qrcode-utils';
 
 export async function GET() {
   try {
@@ -64,17 +64,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Gagal generate kode unik. Silakan coba lagi.' }, { status: 500 });
     }
 
-    // Generate QR code
-    const qrCodeData = `locker:${code}`;
-    const qrCodeBase64 = await QRCode.toDataURL(qrCodeData, {
-      width: 200,
-      margin: 2,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    });
+    // Generate QR code with overlay using the same function as the QR code management page
+    // This ensures the QR codes have the locker number in the center, exactly like the ones generated in bulk
+    const qrCodeBase64 = await generateQRCodeWithOverlay(code);
 
+    // First create the locker so we have its ID
     const locker = await Locker.create({
       code,
       label,
@@ -82,6 +76,21 @@ export async function POST(request: NextRequest) {
       qrCode: qrCodeBase64,
       userId: user._id,
     });
+
+    // Save the QR code to the QR codes collection for management
+    // This makes it visible in the QR code management section (Kelola QR Code)
+    // We need to include the lockerId so it shows "Terhubung dengan Loker:" in the QR management screen
+    const qrCodeDoc = await QRCodeModel.create({
+      code,
+      qrCode: qrCodeBase64,
+      userId: user._id,
+      isUsed: true, // Mark it as used since it's directly associated with a locker
+      lockerId: locker._id, // Set the lockerId reference to connect it to the locker
+    });
+
+    // Update the locker with the QR code ID reference
+    locker.qrCodeId = qrCodeDoc._id;
+    await locker.save();
 
     return NextResponse.json(locker, { status: 201 });
   } catch (error) {

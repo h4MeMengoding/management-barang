@@ -68,6 +68,10 @@ const LockerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  qrCodeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'QRCode',
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
