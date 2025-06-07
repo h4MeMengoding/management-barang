@@ -416,6 +416,98 @@ select.dark-input option {
     font-size: 16px; /* Prevent zoom on iOS */
     border-radius: 8px;
   }
+  
+  /* Ensure flex containers don't overflow on mobile */
+  .flex {
+    min-width: 0;
+  }
+  
+  /* Improve button spacing and prevent overflow */
+  .space-x-1 > * + * {
+    margin-left: 0.25rem;
+  }
+  
+  .space-x-2 > * + * {
+    margin-left: 0.5rem;
+  }
+  
+  /* Ensure buttons have minimum touch targets */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent text overflow in category names */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Improve flex layouts on mobile */
+  .flex-1 {
+    min-width: 0;
+  }
+  
+  /* Better mobile padding for cards */
+  .p-4 {
+    padding: 0.75rem;
+  }
+  
+  .px-4 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  .py-4 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  
+  /* Ensure proper gap spacing on mobile */
+  .gap-3 {
+    gap: 0.75rem;
+  }
+  
+  .gap-4 {
+    gap: 1rem;
+  }
+  
+  /* Mobile-specific flex column for better layout */
+  .flex-col {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Ensure action buttons don't shrink */
+  .flex-shrink-0 {
+    flex-shrink: 0;
+  }
+}
+
+/* Additional mobile improvements for better touch experience */
+@media (max-width: 768px) {
+  /* Ensure all interactive elements have proper touch targets */
+  a, button, input, select, textarea {
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+    touch-action: manipulation;
+  }
+  
+  /* Improve input field sizing on mobile */
+  input[type="text"], textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  /* Better spacing for mobile layouts */
+  .space-y-1 > * + * {
+    margin-top: 0.25rem;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 0.5rem;
+  }
 }
 
 /* Custom Scroll for cards */
@@ -790,5 +882,97 @@ select.dark-input option {
     padding: 12px 12px;
     font-size: 16px; /* Prevent zoom on iOS */
     border-radius: 8px;
+  }
+  
+  /* Ensure flex containers don't overflow on mobile */
+  .flex {
+    min-width: 0;
+  }
+  
+  /* Improve button spacing and prevent overflow */
+  .space-x-1 > * + * {
+    margin-left: 0.25rem;
+  }
+  
+  .space-x-2 > * + * {
+    margin-left: 0.5rem;
+  }
+  
+  /* Ensure buttons have minimum touch targets */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent text overflow in category names */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Improve flex layouts on mobile */
+  .flex-1 {
+    min-width: 0;
+  }
+  
+  /* Better mobile padding for cards */
+  .p-4 {
+    padding: 0.75rem;
+  }
+  
+  .px-4 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  .py-4 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  
+  /* Ensure proper gap spacing on mobile */
+  .gap-3 {
+    gap: 0.75rem;
+  }
+  
+  .gap-4 {
+    gap: 1rem;
+  }
+  
+  /* Mobile-specific flex column for better layout */
+  .flex-col {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Ensure action buttons don't shrink */
+  .flex-shrink-0 {
+    flex-shrink: 0;
+  }
+}
+
+/* Additional mobile improvements for better touch experience */
+@media (max-width: 768px) {
+  /* Ensure all interactive elements have proper touch targets */
+  a, button, input, select, textarea {
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+    touch-action: manipulation;
+  }
+  
+  /* Improve input field sizing on mobile */
+  input[type="text"], textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  /* Better spacing for mobile layouts */
+  .space-y-1 > * + * {
+    margin-top: 0.25rem;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 0.5rem;
   }
 }
