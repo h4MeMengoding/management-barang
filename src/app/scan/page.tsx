@@ -1263,7 +1263,7 @@ export default function QRScanner() {
                 <p className="text-xs text-gray-400 mb-2">
                   Jika kamera tidak bisa digunakan atau scan gagal, masukkan kode 4 digit di sini
                 </p>
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
                   <input
                     type="text"
                     id="manualCode"
@@ -1289,8 +1289,9 @@ export default function QRScanner() {
                   <button
                     onClick={() => manualCode && handleQRCodeDetected(manualCode)}
                     disabled={manualCode.length !== 4}
-                    className="px-4 py-2 dark-button-primary text-white font-medium 
-                      transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-2 sm:px-4 sm:py-2 dark-button-primary text-white font-medium text-sm sm:text-base
+                      transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed 
+                      rounded-lg min-w-0 whitespace-nowrap flex-shrink-0"
                   >
                     Submit
                   </button>

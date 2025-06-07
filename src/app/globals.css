@@ -387,6 +387,35 @@ select.dark-input option {
     padding: 4px 8px;
     font-size: 0.75rem;
   }
+  
+  .dark-button, .dark-button-primary {
+    padding: 10px 12px;
+    min-height: 44px; /* Minimum touch target size */
+    font-size: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Prevent button overflow in flex containers */
+  .dark-button-primary {
+    min-width: 0;
+    flex-shrink: 0;
+  }
+  
+  /* Improve touch targets for mobile */
+  button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Better mobile input styling */
+  .dark-input {
+    padding: 12px 12px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    border-radius: 8px;
+  }
 }
 
 /* Custom Scroll for cards */
@@ -730,4 +759,36 @@ select.dark-input option {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   line-clamp: 3;
+}
+
+/* Mobile-specific button optimizations */
+@media (max-width: 640px) {
+  .dark-button, .dark-button-primary {
+    padding: 10px 12px;
+    min-height: 44px; /* Minimum touch target size */
+    font-size: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Prevent button overflow in flex containers */
+  .dark-button-primary {
+    min-width: 0;
+    flex-shrink: 0;
+  }
+  
+  /* Improve touch targets for mobile */
+  button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Better mobile input styling */
+  .dark-input {
+    padding: 12px 12px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    border-radius: 8px;
+  }
 }
