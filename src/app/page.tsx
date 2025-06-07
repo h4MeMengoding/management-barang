@@ -117,7 +117,6 @@ function CounterAnimation({
       <span className={`${className} inline-block transition-all`}>
         {prefix}{count.toLocaleString()}{suffix}
       </span>
-      <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 animate-pulse"></div>
     </div>
   );
 }

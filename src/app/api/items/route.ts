@@ -4,7 +4,7 @@ import { authOptions, isValidSession } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb';
 import { Item, User, Locker } from '@/models';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -19,7 +19,17 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const items = await Item.find({ userId: user._id })
+    // Get query parameters
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+
+    // Build query
+    const query: { userId: string; category?: string } = { userId: user._id };
+    if (category) {
+      query.category = category;
+    }
+
+    const items = await Item.find(query)
       .populate('lockerId', 'code label')
       .sort({ createdAt: -1 });
     

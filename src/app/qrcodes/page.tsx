@@ -253,11 +253,9 @@ export default function QRCodesPage() {
                     onChange={(e) => setBatchSize(Number(e.target.value))}
                     className="w-full dark-input text-gray-200"
                   >
+                    <option value={2}>2 QR Codes</option>
                     <option value={5}>5 QR Codes</option>
                     <option value={10}>10 QR Codes</option>
-                    <option value={20}>20 QR Codes</option>
-                    <option value={50}>50 QR Codes</option>
-                    <option value={100}>100 QR Codes</option>
                   </select>
                 </div>
                 

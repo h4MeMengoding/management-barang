@@ -3,13 +3,28 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Tag, Save, Edit2, Trash2, Package, ArrowLeft, Plus } from 'lucide-react';
+import { Tag, Save, Edit2, Trash2, Package, ArrowLeft, Plus, Eye, MapPin } from 'lucide-react';
 import { showSuccess, showError, showCustomConfirm } from '@/lib/alerts';
 import Link from 'next/link';
 
 interface CategoryWithCount {
   name: string;
   itemCount: number;
+}
+
+interface Item {
+  _id: string;
+  name: string;
+  description?: string;
+  category: string;
+  quantity: number;
+  lockerId: {
+    _id: string;
+    code: string;
+    label: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function CategoriesPage() {
@@ -20,6 +35,9 @@ export default function CategoriesPage() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categoryItems, setCategoryItems] = useState<Item[]>([]);
+  const [loadingItems, setLoadingItems] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -60,6 +78,35 @@ export default function CategoriesPage() {
       showError('Gagal memuat kategori');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategoryItems = async (categoryName: string) => {
+    try {
+      setLoadingItems(true);
+      const response = await fetch(`/api/items?category=${encodeURIComponent(categoryName)}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch items');
+      }
+      
+      const items = await response.json();
+      setCategoryItems(items);
+    } catch (error) {
+      console.error('Error fetching category items:', error);
+      showError('Gagal memuat barang kategori');
+      setCategoryItems([]);
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+
+  const handleCategoryClick = async (categoryName: string) => {
+    if (selectedCategory === categoryName) {
+      setSelectedCategory(null);
+      setCategoryItems([]);
+    } else {
+      setSelectedCategory(categoryName);
+      await fetchCategoryItems(categoryName);
     }
   };
 
@@ -185,7 +232,7 @@ export default function CategoriesPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-slate-900 pt-20">
+      <div className="min-h-screen dark-theme pt-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -200,7 +247,7 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-20">
+    <div className="min-h-screen dark-theme pt-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -216,7 +263,7 @@ export default function CategoriesPage() {
                 <Tag size={28} className="text-blue-500" />
                 <span>Kategori</span>
               </h1>
-              <p className="text-slate-400 mt-1">Kelola kategori item Anda</p>
+              <p className="text-slate-400 mt-1">Kelola kategori item Anda. Klik kategori untuk melihat barang-barangnya.</p>
             </div>
           </div>
         </div>
@@ -262,79 +309,165 @@ export default function CategoriesPage() {
           ) : (
             <div className="divide-y divide-slate-700/50">
               {categories.map((category) => (
-                <div key={category.name} className="px-6 py-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center">
-                      <Tag size={20} className="text-blue-400" />
-                    </div>
-                    <div>
-                      {editingCategory === category.name ? (
-                        <input
-                          type="text"
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          className="px-3 py-1 bg-slate-700 border border-slate-600 rounded text-white text-lg font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              updateCategory(category.name, editingName);
-                            } else if (e.key === 'Escape') {
-                              cancelEditing();
-                            }
-                          }}
-                          autoFocus
-                        />
-                      ) : (
-                        <h3 className="text-lg font-medium text-white">{category.name}</h3>
-                      )}
-                      <div className="flex items-center space-x-2 text-sm text-slate-400">
-                        <Package size={14} />
-                        <span>{category.itemCount} item</span>
+                <div key={category.name}>
+                  <div className="px-6 py-4 flex items-center justify-between">
+                    <div 
+                      className="flex items-center space-x-4 flex-1 cursor-pointer hover:bg-slate-700/30 -mx-6 px-6 py-2 rounded-lg transition-colors duration-200"
+                      onClick={() => handleCategoryClick(category.name)}
+                    >
+                      <div className="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center">
+                        <Tag size={20} className="text-blue-400" />
                       </div>
+                      <div className="flex-1">
+                        {editingCategory === category.name ? (
+                          <input
+                            type="text"
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            className="px-3 py-1 bg-slate-700 border border-slate-600 rounded text-white text-lg font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                updateCategory(category.name, editingName);
+                              } else if (e.key === 'Escape') {
+                                cancelEditing();
+                              }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            autoFocus
+                          />
+                        ) : (
+                          <>
+                            <h3 className="text-lg font-medium text-white flex items-center space-x-2">
+                              <span>{category.name}</span>
+                              {selectedCategory === category.name && (
+                                <Eye size={16} className="text-blue-400" />
+                              )}
+                            </h3>
+                            <div className="flex items-center space-x-2 text-sm text-slate-400">
+                              <Package size={14} />
+                              <span>{category.itemCount} item</span>
+                              {category.itemCount > 0 && (
+                                <span className="text-blue-400">• Klik untuk melihat barang</span>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      {editingCategory === category.name ? (
+                        <>
+                          <button
+                            onClick={() => updateCategory(category.name, editingName)}
+                            className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
+                            title="Simpan"
+                          >
+                            <Save size={16} />
+                          </button>
+                          <button
+                            onClick={cancelEditing}
+                            className="p-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors duration-200"
+                            title="Batal"
+                          >
+                            <ArrowLeft size={16} />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditing(category.name);
+                            }}
+                            className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors duration-200"
+                            title="Edit"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteCategory(category.name);
+                            }}
+                            disabled={category.itemCount > 0}
+                            className={`p-2 rounded-lg transition-colors duration-200 ${
+                              category.itemCount > 0
+                                ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                                : 'bg-red-600 hover:bg-red-700 text-white'
+                            }`}
+                            title={category.itemCount > 0 ? 'Tidak dapat menghapus kategori yang masih memiliki item' : 'Hapus'}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
-                    {editingCategory === category.name ? (
-                      <>
-                        <button
-                          onClick={() => updateCategory(category.name, editingName)}
-                          className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
-                          title="Simpan"
-                        >
-                          <Save size={16} />
-                        </button>
-                        <button
-                          onClick={cancelEditing}
-                          className="p-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors duration-200"
-                          title="Batal"
-                        >
-                          <ArrowLeft size={16} />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => startEditing(category.name)}
-                          className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors duration-200"
-                          title="Edit"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => deleteCategory(category.name)}
-                          disabled={category.itemCount > 0}
-                          className={`p-2 rounded-lg transition-colors duration-200 ${
-                            category.itemCount > 0
-                              ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                              : 'bg-red-600 hover:bg-red-700 text-white'
-                          }`}
-                          title={category.itemCount > 0 ? 'Tidak dapat menghapus kategori yang masih memiliki item' : 'Hapus'}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </>
-                    )}
-                  </div>
+                  {/* Items List for Selected Category */}
+                  {selectedCategory === category.name && (
+                    <div className="px-6 pb-4">
+                      <div className="bg-slate-900/50 rounded-lg border border-slate-600/50 overflow-hidden">
+                        <div className="px-4 py-3 bg-slate-700/30 border-b border-slate-600/50">
+                          <h4 className="text-sm font-medium text-slate-300 flex items-center space-x-2">
+                            <Package size={14} />
+                            <span>Barang dalam kategori &quot;{category.name}&quot;</span>
+                          </h4>
+                        </div>
+                        
+                        {loadingItems ? (
+                          <div className="p-8 text-center">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-3"></div>
+                            <p className="text-slate-400 text-sm">Memuat barang...</p>
+                          </div>
+                        ) : categoryItems.length === 0 ? (
+                          <div className="p-8 text-center">
+                            <Package size={32} className="text-slate-600 mx-auto mb-3" />
+                            <p className="text-slate-400">Tidak ada barang dalam kategori ini</p>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-slate-600/30">
+                            {categoryItems.map((item) => (
+                              <div key={item._id} className="p-4 hover:bg-slate-800/30 transition-colors duration-200">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex-1">
+                                    <h5 className="font-medium text-white mb-1">{item.name}</h5>
+                                    {item.description && (
+                                      <p className="text-sm text-slate-400 mb-2 line-clamp-2">{item.description}</p>
+                                    )}
+                                    <div className="flex items-center space-x-4 text-sm text-slate-400">
+                                      <span>Jumlah: {item.quantity}</span>
+                                      <div className="flex items-center space-x-1">
+                                        <MapPin size={12} />
+                                        <span>{item.lockerId.code} - {item.lockerId.label}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <Link
+                                      href={`/items/${item._id}/edit`}
+                                      className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors duration-200"
+                                      title="Edit barang"
+                                    >
+                                      <Edit2 size={14} />
+                                    </Link>
+                                    <Link
+                                      href={`/lockers/${item.lockerId._id}`}
+                                      className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+                                      title="Lihat loker"
+                                    >
+                                      <Eye size={14} />
+                                    </Link>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
