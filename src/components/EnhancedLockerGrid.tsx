@@ -15,7 +15,7 @@ interface EnhancedLockerGridProps {
 
 export function EnhancedLockerGrid({ 
   lockers, 
-  items, 
+  items, // eslint-disable-line @typescript-eslint/no-unused-vars
   loading, 
   getItemsForLocker, 
   onDataRefresh 

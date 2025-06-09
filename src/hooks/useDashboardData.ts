@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Session } from 'next-auth';
 import { Locker, Item } from '@/types';
 
-export const useDashboardData = (session: any) => {
+export const useDashboardData = (session: Session | null) => {
   const [lockers, setLockers] = useState<Locker[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +43,7 @@ export const useDashboardData = (session: any) => {
     if (typeof lockerId === 'object') {
       return lockerId;
     }
-    return lockers.find(locker => locker._id === lockerId);
+    return lockers.find(locker => locker._id === lockerId) || null;
   };
 
   useEffect(() => {

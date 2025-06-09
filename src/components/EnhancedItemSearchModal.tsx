@@ -9,7 +9,7 @@ interface ItemSearchModalProps {
   items: Item[];
   isOpen: boolean;
   onClose: () => void;
-  getLockerInfo: (lockerId: string | { _id: string; code: string; label: string }) => any;
+  getLockerInfo: (lockerId: string | { _id: string; code: string; label: string }) => { _id: string; code: string; label: string } | null;
 }
 
 export function EnhancedItemSearchModal({ items, isOpen, onClose, getLockerInfo }: ItemSearchModalProps) {
