@@ -7,6 +7,7 @@ import { ArrowLeft, Camera, Upload, Package, FileImage } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import jsQR from 'jsqr';
+import dynamic from 'next/dynamic';
 
 interface ScanResult {
   locker: {
@@ -25,7 +26,7 @@ interface ScanResult {
   }>;
 }
 
-export default function QRScanner() {
+function QRScannerComponent() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [scanning, setScanning] = useState(false);
@@ -668,7 +669,7 @@ export default function QRScanner() {
                 context.moveTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
                 context.lineTo(code.location.topRightCorner.x, code.location.topRightCorner.y);
                 context.lineTo(code.location.bottomRightCorner.x, code.location.bottomRightCorner.y);
-                context.lineTo(code.location.bottomLeftCorner.x, code.location.bottomLeftCorner.y);
+                context.lineTo(code.location.bottomLeftCorner.x, code.location.topLeftCorner.y);
                 context.lineTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
                 context.stroke();
                 
@@ -1461,3 +1462,18 @@ export default function QRScanner() {
     </div>
   );
 }
+
+// Use dynamic import to prevent SSR hydration issues
+const QRScanner = dynamic(() => Promise.resolve(QRScannerComponent), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center dark-theme">
+      <div className="dark-card p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+        <p className="mt-4 text-gray-400 text-center">Memuat Scanner...</p>
+      </div>
+    </div>
+  )
+});
+
+export default QRScanner;

@@ -45,11 +45,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // React strict mode to catch issues early
+  reactStrictMode: true,
 };
 
 const pwaConfig = withPWA({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
+  disable: process.env.NODE_ENV === 'development', // Disable PWA in development to avoid errors
   register: true,
   skipWaiting: true,
   sw: 'sw.js',
