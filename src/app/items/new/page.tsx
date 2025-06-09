@@ -123,7 +123,7 @@ export default function NewItem() {
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200 transform active:scale-95"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
@@ -242,14 +242,14 @@ export default function NewItem() {
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200 font-medium"
+                  className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200 font-medium transform active:scale-95"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center space-x-2 px-6 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 px-6 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
                 >
                   <Save size={20} />
                   <span>{loading ? 'Menyimpan...' : 'Simpan Barang'}</span>

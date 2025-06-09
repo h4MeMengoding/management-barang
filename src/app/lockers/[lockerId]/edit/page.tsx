@@ -126,7 +126,7 @@ function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }
           <h2 className="text-2xl font-bold text-slate-100">Loker tidak ditemukan</h2>
           <button
             onClick={() => router.push('/')}
-            className="mt-4 dark-button-primary"
+            className="mt-4 dark-button-primary transform active:scale-95"
           >
             Kembali ke Dashboard
           </button>
@@ -141,7 +141,7 @@ function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200 transform active:scale-95"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
@@ -215,14 +215,14 @@ function EditLockerContent({ params }: { params: Promise<{ lockerId: string }> }
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200 font-medium"
+                className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200 font-medium transform active:scale-95"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex items-center space-x-2 px-6 py-3 dark-button text-blue-400 hover:text-blue-300 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 px-6 py-3 dark-button text-blue-400 hover:text-blue-300 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 disabled:active:scale-100"
               >
                 <Save size={20} />
                 <span>{submitting ? 'Menyimpan...' : 'Simpan Perubahan'}</span>

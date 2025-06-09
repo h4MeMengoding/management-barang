@@ -193,7 +193,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
           <p className="text-gray-400 mb-6">Loker yang Anda cari tidak ditemukan atau telah dihapus.</p>
           <button
             onClick={() => router.push('/')}
-            className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200"
+            className="px-6 py-3 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200 transform active:scale-95"
           >
             Kembali ke Dashboard
           </button>
@@ -208,7 +208,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200 transform active:scale-95"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
@@ -224,7 +224,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
             <div className="flex space-x-2">
               <button
                 onClick={() => router.push(`/lockers/${lockerId}/edit`)}
-                className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200"
+                className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 transition-all duration-200 transform active:scale-95"
                 title="Edit loker"
               >
                 <Settings size={16} />
@@ -232,7 +232,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
               </button>
               <button
                 onClick={deleteLocker}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200"
+                className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 transform active:scale-95"
                 title="Hapus loker"
               >
                 <Trash2 size={16} />
@@ -257,14 +257,14 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
               <div className="space-y-3">
                 <button
                   onClick={downloadQRCode}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 dark-button text-blue-400 hover:text-blue-300 font-medium transition-all duration-200"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 dark-button text-blue-400 hover:text-blue-300 font-medium transition-all duration-200 transform active:scale-95"
                 >
                   <Download size={16} />
                   <span>Download</span>
                 </button>
                 <button
                   onClick={printQRCode}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200 transform active:scale-95"
                 >
                   <QrCode size={16} />
                   <span>Print</span>
@@ -282,7 +282,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
                 </h2>
                 <button
                   onClick={() => router.push(`/items/new?lockerId=${lockerId}`)}
-                  className="flex items-center space-x-2 px-4 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200"
+                  className="flex items-center space-x-2 px-4 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200 transform active:scale-95"
                 >
                   <Plus size={20} />
                   <span>Tambah Barang</span>
@@ -296,7 +296,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
                   <p className="text-gray-400 mb-6">Loker ini belum memiliki barang. Mulai tambahkan barang pertama.</p>
                   <button
                     onClick={() => router.push(`/items/new?lockerId=${lockerId}`)}
-                    className="inline-flex items-center space-x-2 px-6 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200"
+                    className="inline-flex items-center space-x-2 px-6 py-3 dark-button text-green-400 hover:text-green-300 font-medium transition-all duration-200 transform active:scale-95"
                   >
                     <Plus size={20} />
                     <span>Tambah Barang</span>
@@ -315,14 +315,14 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
                           <div className="flex space-x-1 flex-shrink-0">
                             <button
                               onClick={() => router.push(`/items/${item._id}/edit`)}
-                              className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200"
+                              className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200 transform active:scale-95"
                               title="Edit barang"
                             >
                               <Edit2 size={14} />
                             </button>
                             <button
                               onClick={() => deleteItem(item._id)}
-                              className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200"
+                              className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-600/50 rounded-lg transition-all duration-200 transform active:scale-95"
                               title="Hapus barang"
                             >
                               <Trash2 size={14} />

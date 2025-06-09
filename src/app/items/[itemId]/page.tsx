@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ArrowLeft, Package, MapPin, Tag, Calendar, User, Edit3 } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, Tag, Calendar, Edit3 } from 'lucide-react';
 import Link from 'next/link';
 
 interface ItemData {
@@ -33,6 +33,30 @@ export default function ItemDetailPage() {
   const itemId = params.itemId as string;
 
   useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/items/${itemId}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Barang tidak ditemukan');
+          } else {
+            setError('Gagal memuat data barang');
+          }
+          return;
+        }
+
+        const itemData = await response.json();
+        setItem(itemData);
+      } catch (error) {
+        console.error('Error fetching item:', error);
+        setError('Terjadi kesalahan saat memuat data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (!session) {
       router.push('/');
       return;
@@ -41,31 +65,7 @@ export default function ItemDetailPage() {
     if (itemId) {
       fetchItem();
     }
-  }, [session, itemId]);
-
-  const fetchItem = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/items/${itemId}`);
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          setError('Barang tidak ditemukan');
-        } else {
-          setError('Gagal memuat data barang');
-        }
-        return;
-      }
-
-      const itemData = await response.json();
-      setItem(itemData);
-    } catch (error) {
-      console.error('Error fetching item:', error);
-      setError('Terjadi kesalahan saat memuat data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [session, itemId, router]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
@@ -109,7 +109,7 @@ export default function ItemDetailPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200 transform active:scale-95"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
@@ -125,7 +125,7 @@ export default function ItemDetailPage() {
             </p>
             <button
               onClick={() => router.back()}
-              className="dark-button px-6 py-3"
+              className="dark-button px-6 py-3 transform active:scale-95"
             >
               Kembali
             </button>
@@ -146,7 +146,7 @@ export default function ItemDetailPage() {
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200 transform active:scale-95"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
@@ -164,7 +164,7 @@ export default function ItemDetailPage() {
             
             <Link
               href={`/items/${item._id}/edit`}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-200"
+              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-200 transform active:scale-95"
             >
               <Edit3 size={18} />
               <span className="hidden sm:inline">Edit Barang</span>
@@ -263,7 +263,7 @@ export default function ItemDetailPage() {
                       <div className="pt-2">
                         <Link
                           href={`/lockers/${item.lockerId._id}`}
-                          className="inline-flex items-center space-x-2 text-purple-400 hover:text-purple-300 text-sm transition-colors duration-200"
+                          className="inline-flex items-center space-x-2 text-purple-400 hover:text-purple-300 text-sm transition-colors duration-200 transform active:scale-95"
                         >
                           <MapPin size={16} />
                           <span>Lihat Detail Loker</span>

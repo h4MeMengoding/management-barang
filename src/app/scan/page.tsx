@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, Camera, Upload, Package, FileImage } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import jsQR from 'jsqr';
 
 interface ScanResult {
@@ -1063,7 +1064,7 @@ export default function QRScanner() {
                 setScanResult(null);
                 setError('');
               }}
-              className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
+              className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200 transform active:scale-95"
             >
               <ArrowLeft size={20} />
               <span>Scan Lagi</span>
@@ -1102,12 +1103,12 @@ export default function QRScanner() {
             {scanResult.items.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-400">Belum ada barang di loker ini</p>
-                <a
+                <Link
                   href="/items/new"
                   className="inline-flex items-center space-x-2 mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
                   <span>Tambah Barang</span>
-                </a>
+                </Link>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1140,7 +1141,7 @@ export default function QRScanner() {
         <div className="mb-8">
           <button
             onClick={() => router.push('/')}
-            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200 transform active:scale-95"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
@@ -1165,7 +1166,7 @@ export default function QRScanner() {
                     setError('');
                     window.location.reload();
                   }}
-                  className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
+                  className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors transform active:scale-95"
                 >
                   Refresh Halaman
                 </button>
@@ -1198,7 +1199,7 @@ export default function QRScanner() {
               
               <button
                 onClick={startCamera}
-                className="w-full flex items-center justify-center space-x-2 px-6 py-4 dark-button-primary text-white font-medium transition-all duration-200"
+                className="w-full flex items-center justify-center space-x-2 px-6 py-4 dark-button-primary text-white font-medium transition-all duration-200 transform active:scale-95"
               >
                 <Camera size={20} />
                 <span>Mulai Scan dengan Kamera</span>
@@ -1236,7 +1237,7 @@ export default function QRScanner() {
                   </div>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200"
+                    className="px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200 transform active:scale-95"
                   >
                     <Upload size={16} className="inline mr-2" />
                     <span>Pilih File</span>
@@ -1281,7 +1282,7 @@ export default function QRScanner() {
                     disabled={manualCode.length !== 4}
                     className="px-3 py-2 sm:px-4 sm:py-2 dark-button-primary text-white font-medium text-sm sm:text-base
                       transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed 
-                      rounded-lg min-w-0 whitespace-nowrap flex-shrink-0"
+                      rounded-lg min-w-0 whitespace-nowrap flex-shrink-0 transform active:scale-95"
                   >
                     Submit
                   </button>
@@ -1368,7 +1369,7 @@ export default function QRScanner() {
               </div>
               <button
                 onClick={stopCamera}
-                className="w-full px-6 py-3 dark-button text-red-400 hover:text-red-300 font-medium transition-all duration-200"
+                className="w-full px-6 py-3 dark-button text-red-400 hover:text-red-300 font-medium transition-all duration-200 transform active:scale-95"
               >
                 Stop Scanning
               </button>
@@ -1444,7 +1445,7 @@ export default function QRScanner() {
                           }
                         }, 500);
                       }}
-                      className="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors"
+                      className="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors transform active:scale-95"
                     >
                       Beralih ke Input Manual
                     </button>

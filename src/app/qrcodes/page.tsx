@@ -187,7 +187,7 @@ export default function QRCodesPage() {
         <div className="mb-8">
           <button
             onClick={() => router.push('/')}
-            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200 transform active:scale-95"
           >
             <ArrowLeft size={20} />
             <span>Kembali</span>
@@ -205,7 +205,7 @@ export default function QRCodesPage() {
           <div className="flex space-x-2 mb-8 p-1 bg-slate-800/30 rounded-lg border border-slate-700/30">
             <button
               onClick={() => setView('generate')}
-              className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+              className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200 transform active:scale-95 ${
                 view === 'generate'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'text-gray-400 hover:text-gray-200 hover:bg-slate-700/30'
@@ -216,7 +216,7 @@ export default function QRCodesPage() {
             </button>
             <button
               onClick={() => setView('manage')}
-              className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+              className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200 transform active:scale-95 ${
                 view === 'manage'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'text-gray-400 hover:text-gray-200 hover:bg-slate-700/30'
@@ -262,7 +262,7 @@ export default function QRCodesPage() {
                 <button
                   onClick={generateQRCodes}
                   disabled={loading}
-                  className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
                 >
                   {loading ? (
                     <>
@@ -284,7 +284,7 @@ export default function QRCodesPage() {
                   </p>
                   <button
                     onClick={() => setView('manage')}
-                    className="inline-flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200"
+                    className="inline-flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 transform active:scale-95"
                   >
                     <Eye size={16} />
                     <span>Lihat QR Codes</span>
@@ -315,7 +315,7 @@ export default function QRCodesPage() {
                   <button
                     onClick={downloadAllQRCodes}
                     disabled={loading || qrCodes.length === 0}
-                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
                     title="Download semua QR codes dalam file ZIP"
                   >
                     <Download size={16} />
@@ -324,7 +324,7 @@ export default function QRCodesPage() {
                   <button
                     onClick={regenerateAllQRCodes}
                     disabled={loading || qrCodes.length === 0}
-                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
                     title="Regenerasi semua QR codes dengan angka di tengah"
                   >
                     {loading ? (
@@ -337,7 +337,7 @@ export default function QRCodesPage() {
                   <button
                     onClick={loadExistingQRCodes}
                     disabled={loading}
-                    className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200 disabled:opacity-50"
+                    className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200 disabled:opacity-50 transform active:scale-95"
                   >
                     {loading ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
@@ -361,7 +361,7 @@ export default function QRCodesPage() {
                   <p className="text-gray-400 mb-6">Generate QR codes terlebih dahulu untuk memulai.</p>
                   <button
                     onClick={() => setView('generate')}
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200"
+                    className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 transform active:scale-95"
                   >
                     <QrCode size={18} />
                     <span>Generate QR Codes</span>
@@ -379,7 +379,7 @@ export default function QRCodesPage() {
                       {!qr.isUsed && (
                         <button
                           onClick={() => deleteQRCode(qr._id)}
-                          className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-all duration-200 print:hidden"
+                          className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-all duration-200 print:hidden transform active:scale-95"
                           title="Hapus QR Code"
                         >
                           <Trash2 size={16} />

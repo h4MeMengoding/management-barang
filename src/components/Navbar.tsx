@@ -252,7 +252,7 @@ export default function Navbar() {
                 {searchTerm && (
                   <button
                     onClick={clearSearch}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors duration-200"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors duration-200 active:scale-95"
                   >
                     <X size={18} />
                   </button>
@@ -291,7 +291,7 @@ export default function Navbar() {
                             e.stopPropagation();
                             handleResultClick(result);
                           }}
-                          className="w-full px-4 py-3 text-left hover:bg-slate-700/50 transition-all duration-200 group cursor-pointer block"
+                          className="w-full px-4 py-3 text-left hover:bg-slate-700/50 transition-all duration-200 group cursor-pointer block transform active:scale-95"
                           style={{ pointerEvents: 'auto' }}
                         >
                           <div className="flex items-start space-x-3">
@@ -376,7 +376,7 @@ export default function Navbar() {
                 {searchTerm && (
                   <button
                     onClick={clearSearch}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors duration-200"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors duration-200 active:scale-95"
                   >
                     <X size={16} />
                   </button>
@@ -414,7 +414,7 @@ export default function Navbar() {
                             e.stopPropagation();
                             handleResultClick(result);
                           }}
-                          className="w-full px-3 py-2.5 text-left hover:bg-slate-700/50 transition-all duration-200 group cursor-pointer"
+                          className="w-full px-3 py-2.5 text-left hover:bg-slate-700/50 transition-all duration-200 group cursor-pointer transform active:scale-95"
                         >
                           <div className="flex items-start space-x-2">
                             <div className={`flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center ${
@@ -490,7 +490,7 @@ export default function Navbar() {
                 {/* Profile Button */}
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="group flex items-center space-x-3 px-4 py-2 bg-slate-800/60 hover:bg-slate-700/80 rounded-xl border border-slate-600/50 hover:border-slate-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-slate-900/50"
+                  className="group flex items-center space-x-3 px-4 py-2 bg-slate-800/60 hover:bg-slate-700/80 rounded-xl border border-slate-600/50 hover:border-slate-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-slate-900/50 transform active:scale-95"
                 >
                   <div className="relative">
                     <Image
@@ -546,7 +546,7 @@ export default function Navbar() {
                       {canInstall && (
                         <button
                           onClick={handleInstallPWA}
-                          className="w-full flex items-center space-x-3 px-5 py-3 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 group"
+                          className="w-full flex items-center space-x-3 px-5 py-3 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 group transform active:scale-95"
                         >
                           <div className="w-8 h-8 bg-blue-600/20 rounded-lg flex items-center justify-center group-hover:bg-blue-600/30 transition-colors duration-200">
                             <Download size={16} className="text-blue-400" />
@@ -574,7 +574,7 @@ export default function Navbar() {
                       {/* Logout Button */}
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center space-x-3 px-5 py-3 text-sm text-slate-300 hover:text-white hover:bg-red-600/10 transition-all duration-200 group mt-1"
+                        className="w-full flex items-center space-x-3 px-5 py-3 text-sm text-slate-300 hover:text-white hover:bg-red-600/10 transition-all duration-200 group mt-1 transform active:scale-95"
                       >
                         <div className="w-8 h-8 bg-red-600/20 rounded-lg flex items-center justify-center group-hover:bg-red-600/30 transition-colors duration-200">
                           <LogOut size={16} className="text-red-400" />
@@ -592,7 +592,7 @@ export default function Navbar() {
               /* Login Button */
               <button
                 onClick={() => signIn('google')}
-                className="group relative px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
+                className="group relative px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 transform active:scale-95"
               >
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition-opacity duration-300"></div>
                 <span className="relative hidden sm:inline">Sign In with Google</span>
@@ -615,7 +615,7 @@ export default function Navbar() {
                   setShowMobileSearch(false);
                   clearSearch();
                 }}
-                className="p-2 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 rounded-xl transition-all duration-200"
+                className="p-2 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 rounded-xl transition-all duration-200 transform active:scale-95"
               >
                 <X size={20} />
               </button>
@@ -636,7 +636,7 @@ export default function Navbar() {
                 {searchTerm && (
                   <button
                     onClick={clearSearch}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors duration-200"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors duration-200 active:scale-95"
                   >
                     <X size={18} />
                   </button>
@@ -672,7 +672,7 @@ export default function Navbar() {
                     <button
                       key={result.id}
                       onClick={() => handleResultClick(result)}
-                      className="w-full p-4 bg-slate-800/30 hover:bg-slate-800/60 rounded-xl transition-all duration-200 text-left"
+                      className="w-full p-4 bg-slate-800/30 hover:bg-slate-800/60 rounded-xl transition-all duration-200 text-left transform active:scale-95"
                     >
                       <div className="flex items-start space-x-3">
                         <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${

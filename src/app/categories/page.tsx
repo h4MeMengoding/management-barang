@@ -254,7 +254,7 @@ export default function CategoriesPage() {
           <div className="flex items-center space-x-4">
             <Link
               href="/"
-              className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors duration-200 flex-shrink-0"
+              className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors duration-200 flex-shrink-0 transform active:scale-95"
             >
               <ArrowLeft size={20} className="text-slate-300" />
             </Link>
@@ -287,7 +287,7 @@ export default function CategoriesPage() {
             />
             <button
               onClick={addCategory}
-              className="px-4 sm:px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 font-medium min-h-[44px] flex-shrink-0"
+              className="px-4 sm:px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 font-medium min-h-[44px] flex-shrink-0 transform active:scale-95"
             >
               <Plus size={16} />
               <span className="whitespace-nowrap">Tambah</span>
@@ -361,14 +361,14 @@ export default function CategoriesPage() {
                         <>
                           <button
                             onClick={() => updateCategory(category.name, editingName)}
-                            className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                            className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center transform active:scale-95"
                             title="Simpan"
                           >
                             <Save size={16} />
                           </button>
                           <button
                             onClick={cancelEditing}
-                            className="p-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                            className="p-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center transform active:scale-95"
                             title="Batal"
                           >
                             <ArrowLeft size={16} />
@@ -381,7 +381,7 @@ export default function CategoriesPage() {
                               e.stopPropagation();
                               startEditing(category.name);
                             }}
-                            className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                            className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center transform active:scale-95"
                             title="Edit"
                           >
                             <Edit2 size={16} />
@@ -392,7 +392,7 @@ export default function CategoriesPage() {
                               deleteCategory(category.name);
                             }}
                             disabled={category.itemCount > 0}
-                            className={`p-2 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                            className={`p-2 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center transform active:scale-95 ${
                               category.itemCount > 0
                                 ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
                                 : 'bg-red-600 hover:bg-red-700 text-white'
@@ -448,14 +448,14 @@ export default function CategoriesPage() {
                                   <div className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 flex-shrink-0">
                                     <Link
                                       href={`/items/${item._id}/edit`}
-                                      className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center"
+                                      className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-colors duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center transform active:scale-95"
                                       title="Edit barang"
                                     >
                                       <Edit2 size={12} className="sm:w-3.5 sm:h-3.5" />
                                     </Link>
                                     <Link
                                       href={`/lockers/${item.lockerId._id}`}
-                                      className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center"
+                                      className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center transform active:scale-95"
                                       title="Lihat loker"
                                     >
                                       <Eye size={12} className="sm:w-3.5 sm:h-3.5" />
