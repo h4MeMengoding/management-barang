@@ -120,16 +120,6 @@ export default function QRScanner() {
       // Consider frame frozen if it hasn't changed for too many checks
       const isNotFrozen = frameStabilityRef.current < 10;
       
-      console.log('Frame validation:', {
-        hasContent,
-        hasReasonableLuminance,
-        hasVariation,
-        isNotFrozen,
-        averageLuminance: averageLuminance.toFixed(1),
-        nonBlackRatio: nonBlackRatio.toFixed(3),
-        frameStability: frameStabilityRef.current
-      });
-      
       return hasContent && hasReasonableLuminance && hasVariation && isNotFrozen;
       
     } catch (error) {

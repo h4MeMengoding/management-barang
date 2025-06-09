@@ -28,7 +28,7 @@ export async function GET(
     }
 
     const item = await Item.findOne({ _id: itemId, userId: user._id })
-      .populate('lockerId', 'code label');
+      .populate('lockerId', 'code label description');
     
     if (!item) {
       return NextResponse.json({ error: 'Item tidak ditemukan' }, { status: 404 });

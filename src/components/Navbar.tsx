@@ -1,7 +1,7 @@
 'use client';
 
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, Package, ChevronDown, Download, Search, X, MapPin, Tag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -45,6 +45,7 @@ interface ItemData {
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { canInstall, isInstalled, installPWA } = usePWA();
@@ -64,7 +65,10 @@ export default function Navbar() {
         setDropdownOpen(false);
       }
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSearchResults(false);
+        // Add a small delay to allow click handlers to process first
+        setTimeout(() => {
+          setShowSearchResults(false);
+        }, 100);
       }
     };
 
@@ -175,14 +179,15 @@ export default function Navbar() {
   const handleResultClick = (result: SearchResult) => {
     setShowSearchResults(false);
     setSearchTerm('');
+    setShowMobileSearch(false);
     
-    // Navigate based on result type
+    // Navigate based on result type using Next.js router
     if (result.type === 'locker') {
-      window.location.href = `/lockers/${result.id}`;
+      router.push(`/lockers/${result.id}`);
     } else if (result.type === 'item') {
-      window.location.href = `/items/${result.id}/edit`;
+      router.push(`/items/${result.id}/view`);
     } else if (result.type === 'category') {
-      window.location.href = `/categories`;
+      router.push(`/categories`);
     }
   };
 
@@ -256,7 +261,8 @@ export default function Navbar() {
 
               {/* Search Results Dropdown */}
               {showSearchResults && (
-                <div className="absolute top-full mt-2 w-full bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-600/50 py-2 z-50 max-h-96 overflow-y-auto">
+                <div className="absolute top-full mt-2 w-full bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-600/50 py-2 z-[9999] max-h-96 overflow-y-auto"
+                >
                   {isSearching ? (
                     <div className="px-6 py-8 text-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-3"></div>
@@ -280,8 +286,13 @@ export default function Navbar() {
                       {searchResults.map((result) => (
                         <button
                           key={result.id}
-                          onClick={() => handleResultClick(result)}
-                          className="w-full px-4 py-3 text-left hover:bg-slate-700/50 transition-all duration-200 group"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleResultClick(result);
+                          }}
+                          className="w-full px-4 py-3 text-left hover:bg-slate-700/50 transition-all duration-200 group cursor-pointer block"
+                          style={{ pointerEvents: 'auto' }}
                         >
                           <div className="flex items-start space-x-3">
                             <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
@@ -398,8 +409,12 @@ export default function Navbar() {
                       {searchResults.map((result) => (
                         <button
                           key={result.id}
-                          onClick={() => handleResultClick(result)}
-                          className="w-full px-3 py-2.5 text-left hover:bg-slate-700/50 transition-all duration-200 group"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleResultClick(result);
+                          }}
+                          className="w-full px-3 py-2.5 text-left hover:bg-slate-700/50 transition-all duration-200 group cursor-pointer"
                         >
                           <div className="flex items-start space-x-2">
                             <div className={`flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center ${
@@ -656,10 +671,7 @@ export default function Navbar() {
                   {searchResults.map((result) => (
                     <button
                       key={result.id}
-                      onClick={() => {
-                        handleResultClick(result);
-                        setShowMobileSearch(false);
-                      }}
+                      onClick={() => handleResultClick(result)}
                       className="w-full p-4 bg-slate-800/30 hover:bg-slate-800/60 rounded-xl transition-all duration-200 text-left"
                     >
                       <div className="flex items-start space-x-3">
