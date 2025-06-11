@@ -42,22 +42,42 @@ export async function generateQRCodeWithNumberBelow(code: string): Promise<strin
         // Try to load ONLY custom font from public/fonts/ - NO FALLBACKS
         const customFontPaths = [
           path.join(process.cwd(), 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
-          // Vercel specific path in serverless function
+          // Vercel specific paths in serverless function
           path.join('/var/task', 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
-          // Alternative Vercel path
-          '/var/task/.next/static/fonts/Roboto-ExtraBold.ttf'
+          '/var/task/public/fonts/Roboto-ExtraBold.ttf',
+          path.join('/var/task', '.next', 'static', 'fonts', 'Roboto-ExtraBold.ttf'), 
+          '/var/task/.next/static/fonts/Roboto-ExtraBold.ttf',
+          // Alternative build paths
+          path.join(process.cwd(), '.next', 'static', 'fonts', 'Roboto-ExtraBold.ttf'),
+          path.join(process.cwd(), '.next', 'server', 'static', 'fonts', 'Roboto-ExtraBold.ttf')
         ];
         
         let fontRegistered = false;
+        let fontBuffer = null;
+        
+        // Try to load font file from various paths
         for (const fontPath of customFontPaths) {
           try {
-            await fs.access(fontPath);
-            registerFont(fontPath, { family: 'RobotoExtraBold' });
-            console.log(`✅ Successfully registered Roboto-ExtraBold font from: ${fontPath}`);
-            fontRegistered = true;
+            fontBuffer = await fs.readFile(fontPath);
+            console.log(`✅ Font file loaded from: ${fontPath}`);
             break;
+          } catch {
+            console.log(`❌ Font file not found at: ${fontPath}`);
+          }
+        }
+        
+        // If we have font buffer, ALWAYS use temp file approach for reliability
+        if (fontBuffer) {
+          try {
+            // Create temp font file in /tmp directory (available in Vercel)
+            const tempFontPath = path.join('/tmp', 'Roboto-ExtraBold.ttf');
+            await fs.writeFile(tempFontPath, fontBuffer);
+            
+            registerFont(tempFontPath, { family: 'RobotoExtraBold' });
+            console.log(`✅ Successfully registered Roboto-ExtraBold font from temp file: ${tempFontPath}`);
+            fontRegistered = true;
           } catch (error) {
-            console.log(`❌ Roboto-ExtraBold font not found at: ${fontPath}`, error);
+            console.log(`❌ Failed to register font from temp file:`, error);
           }
         }
         

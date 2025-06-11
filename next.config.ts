@@ -26,6 +26,36 @@ const nextConfig: NextConfig = {
         ...config.resolve.alias,
         '@fonts': require('path').join(__dirname, 'public/fonts'),
       };
+      
+      // Ensure font files are copied to build output
+      config.module.rules.push({
+        test: /\.(ttf|otf|woff|woff2)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            outputPath: 'static/fonts/',
+            publicPath: '/_next/static/fonts/',
+          },
+        },
+      });
+
+      // Try to add CopyPlugin if available
+      try {
+        const CopyPlugin = require('copy-webpack-plugin');
+        config.plugins = config.plugins || [];
+        config.plugins.push(
+          new CopyPlugin({
+            patterns: [
+              {
+                from: require('path').join(__dirname, 'public/fonts'),
+                to: require('path').join(__dirname, '.next/static/fonts'),
+              },
+            ],
+          })
+        );
+      } catch (error) {
+        console.log('CopyPlugin not available, relying on build script for font copying');
+      }
     }
     return config;
   },
