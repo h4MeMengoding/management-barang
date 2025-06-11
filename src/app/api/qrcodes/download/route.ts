@@ -9,7 +9,34 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
     // Check if we're in a server environment that supports canvas
     if (typeof window === 'undefined') {
       try {
-        const { createCanvas, loadImage } = await import('canvas');
+        const { createCanvas, loadImage, registerFont } = await import('canvas');
+        
+        // Try to register a system font for better Vercel compatibility
+        try {
+          // Register DejaVu Sans if available (common on Linux/Vercel)
+          const fs = await import('fs/promises');
+          
+          // Common font paths on Vercel/Linux systems
+          const fontPaths = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',
+            '/System/Library/Fonts/Helvetica.ttc', // macOS fallback
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
+          ];
+          
+          for (const fontPath of fontPaths) {
+            try {
+              await fs.access(fontPath);
+              registerFont(fontPath, { family: 'MyCustomFont' });
+              console.log(`Registered font from: ${fontPath}`);
+              break;
+            } catch {
+              // Font not found, try next
+            }
+          }
+        } catch (fontError) {
+          console.warn('Could not register custom font:', fontError);
+        }
         
         // Generate QR code as buffer first
         const qrCodeData = `qrcode:${code}`;
@@ -47,9 +74,36 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
           const fs = await import('fs/promises');
           const path = await import('path');
           
-          // Load icon from public/icons folder - using high quality 512px version
-          const iconPath = path.join(process.cwd(), 'public', 'icons', 'icon-barangku-512.png');
-          const iconBuffer = await fs.readFile(iconPath);
+          // Try multiple possible paths for the icon in production and development
+          const possiblePaths = [
+            path.join(process.cwd(), 'public', 'icons', 'icon-barangku-512.png'),
+            path.join(process.cwd(), 'public', 'icons', 'icon-barangku-192.png'),
+            path.join(process.cwd(), 'public', 'favicon-32x32.png'),
+            // Vercel specific paths
+            path.join('/var/task', 'public', 'icons', 'icon-barangku-512.png'),
+            path.join('/var/task', 'public', 'icons', 'icon-barangku-192.png'),
+            path.join('/var/task', 'public', 'favicon-32x32.png')
+          ];
+          
+          let iconBuffer;
+          let iconFound = false;
+          
+          for (const iconPath of possiblePaths) {
+            try {
+              iconBuffer = await fs.readFile(iconPath);
+              iconFound = true;
+              console.log(`Icon loaded from: ${iconPath}`);
+              break;
+            } catch {
+              console.log(`Icon not found at: ${iconPath}`);
+              continue;
+            }
+          }
+          
+          if (!iconFound || !iconBuffer) {
+            throw new Error('No icon file found in any of the expected locations');
+          }
+          
           const iconImage = await loadImage(iconBuffer);
           
           // Calculate center position for icon - larger size but safe for QR scanning
@@ -84,44 +138,20 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
         // Number below QR code - very close spacing
         const numberY = qrY + qrSize + 15; // Only 15px gap between QR and number
         
-        // Draw number text - using web-safe fonts that work on Vercel
+        // Draw number text - use simple approach that works on Vercel
         ctx.fillStyle = '#000000';
         
-        // Try to use DejaVu Sans (commonly available on Vercel/Linux servers)
-        // Fallback to other common server fonts
-        const fonts = [
-          '28px "DejaVu Sans", sans-serif',
-          '28px "Liberation Sans", sans-serif', 
-          '28px "Nimbus Sans L", sans-serif',
-          '28px "FreeSans", sans-serif',
-          '28px sans-serif' // Final fallback
-        ];
-        
-        // Try each font until one works
-        let fontSet = false;
-        for (const font of fonts) {
-          try {
-            ctx.font = `bold ${font}`;
-            // Test if font is actually available by measuring text
-            const metrics = ctx.measureText(code);
-            if (metrics.width > 0) {
-              fontSet = true;
-              break;
-            }
-          } catch {
-            console.warn(`Font ${font} not available, trying next...`);
-          }
-        }
-        
-        // If no font worked, use the most basic fallback
-        if (!fontSet) {
-          ctx.font = 'bold 28px monospace';
-        }
-        
+        // Use basic font without trying to detect - let canvas handle fallback
+        ctx.font = 'bold 28px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         
         const numberX = canvasWidth / 2;
+        
+        // Add text with stroke for better visibility if font doesn't render properly  
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 1;
+        ctx.strokeText(code, numberX, numberY);
         ctx.fillText(code, numberX, numberY);
         
         // Convert canvas to buffer
