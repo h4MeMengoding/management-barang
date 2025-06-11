@@ -35,53 +35,35 @@ export async function generateQRCodeWithNumberBelow(code: string): Promise<strin
       try {
         const { createCanvas, loadImage, registerFont } = await import('canvas');
         
-        // Register custom Roboto-ExtraBold font from public/fonts/
-        try {
-          const fs = await import('fs/promises');
-          const path = await import('path');
-          
-          // Try to load custom font from public/fonts/
-          const customFontPaths = [
-            path.join(process.cwd(), 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
-            // Vercel specific path
-            path.join('/var/task', 'public', 'fonts', 'Roboto-ExtraBold.ttf')
-          ];
-          
-          let fontRegistered = false;
-          for (const fontPath of customFontPaths) {
-            try {
-              await fs.access(fontPath);
-              registerFont(fontPath, { family: 'RobotoExtraBold' });
-              console.log(`Registered custom font from: ${fontPath}`);
-              fontRegistered = true;
-              break;
-            } catch {
-              console.log(`Custom font not found at: ${fontPath}`);
-            }
+        // Register ONLY custom Roboto-ExtraBold font from public/fonts/
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        
+        // Try to load ONLY custom font from public/fonts/ - NO FALLBACKS
+        const customFontPaths = [
+          path.join(process.cwd(), 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
+          // Vercel specific path in serverless function
+          path.join('/var/task', 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
+          // Alternative Vercel path
+          '/var/task/.next/static/fonts/Roboto-ExtraBold.ttf'
+        ];
+        
+        let fontRegistered = false;
+        for (const fontPath of customFontPaths) {
+          try {
+            await fs.access(fontPath);
+            registerFont(fontPath, { family: 'RobotoExtraBold' });
+            console.log(`✅ Successfully registered Roboto-ExtraBold font from: ${fontPath}`);
+            fontRegistered = true;
+            break;
+          } catch (error) {
+            console.log(`❌ Roboto-ExtraBold font not found at: ${fontPath}`, error);
           }
-          
-          // Fallback to system fonts if custom font fails
-          if (!fontRegistered) {
-            const systemFontPaths = [
-              '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-              '/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',
-              '/System/Library/Fonts/Helvetica.ttc',
-              '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
-            ];
-            
-            for (const fontPath of systemFontPaths) {
-              try {
-                await fs.access(fontPath);
-                registerFont(fontPath, { family: 'SystemBold' });
-                console.log(`Registered fallback font from: ${fontPath}`);
-                break;
-              } catch {
-                // Font not found, try next
-              }
-            }
-          }
-        } catch (fontError) {
-          console.warn('Could not register any font:', fontError);
+        }
+        
+        // If font not found, throw error - NO FALLBACKS
+        if (!fontRegistered) {
+          throw new Error('Roboto-ExtraBold.ttf font file not found in public/fonts/. QR code generation aborted.');
         }
         
         // Generate QR code as buffer first
@@ -157,9 +139,9 @@ export async function generateQRCodeWithNumberBelow(code: string): Promise<strin
         // Number below QR code - minimal spacing
         const numberY = qrY + qrSize + 10; // Only 10px gap between QR and number
         
-        // Draw locker number with custom Roboto-ExtraBold font
+        // Draw locker number with ONLY custom Roboto-ExtraBold font
         ctx.fillStyle = '#000000';
-        ctx.font = 'bold 36px RobotoExtraBold, SystemBold, Arial, sans-serif'; // Use custom font with fallbacks
+        ctx.font = 'bold 36px RobotoExtraBold'; // Use ONLY custom font - NO FALLBACKS
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         

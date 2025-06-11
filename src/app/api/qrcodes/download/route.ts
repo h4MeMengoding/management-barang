@@ -11,61 +11,43 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
       try {
         const { createCanvas, loadImage, registerFont } = await import('canvas');
         
-        // Register custom Roboto-ExtraBold font from public/fonts/
-        try {
-          const fs = await import('fs/promises');
-          const path = await import('path');
-          
-          // Try to load custom font from public/fonts/
-          const customFontPaths = [
-            path.join(process.cwd(), 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
-            // Vercel specific path
-            path.join('/var/task', 'public', 'fonts', 'Roboto-ExtraBold.ttf')
-          ];
-          
-          let fontRegistered = false;
-          for (const fontPath of customFontPaths) {
-            try {
-              await fs.access(fontPath);
-              registerFont(fontPath, { family: 'RobotoExtraBold' });
-              console.log(`Registered custom font from: ${fontPath}`);
-              fontRegistered = true;
-              break;
-            } catch {
-              console.log(`Custom font not found at: ${fontPath}`);
-            }
+        // Register ONLY custom Roboto-ExtraBold font from public/fonts/
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        
+        // Try to load ONLY custom font from public/fonts/ - NO FALLBACKS
+        const customFontPaths = [
+          path.join(process.cwd(), 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
+          // Vercel specific path in serverless function
+          path.join('/var/task', 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
+          // Alternative Vercel path
+          '/var/task/.next/static/fonts/Roboto-ExtraBold.ttf'
+        ];
+        
+        let fontRegistered = false;
+        for (const fontPath of customFontPaths) {
+          try {
+            await fs.access(fontPath);
+            registerFont(fontPath, { family: 'RobotoExtraBold' });
+            console.log(`✅ Successfully registered Roboto-ExtraBold font from: ${fontPath}`);
+            fontRegistered = true;
+            break;
+          } catch (error) {
+            console.log(`❌ Roboto-ExtraBold font not found at: ${fontPath}`, error);
           }
-          
-          // Fallback to system fonts if custom font fails
-          if (!fontRegistered) {
-            const systemFontPaths = [
-              '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-              '/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',
-              '/System/Library/Fonts/Helvetica.ttc', // macOS fallback
-              '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
-            ];
-            
-            for (const fontPath of systemFontPaths) {
-              try {
-                await fs.access(fontPath);
-                registerFont(fontPath, { family: 'SystemBold' });
-                console.log(`Registered fallback font from: ${fontPath}`);
-                break;
-              } catch {
-                // Font not found, try next
-              }
-            }
-          }
-        } catch (fontError) {
-          console.warn('Could not register any font:', fontError);
         }
         
-        // Generate QR code as buffer first
+        // If font not found, throw error - NO FALLBACKS
+        if (!fontRegistered) {
+          throw new Error('Roboto-ExtraBold.ttf font file not found in public/fonts/. QR code generation aborted.');
+        }
+        
+        // Generate QR code as buffer first with MAXIMUM error correction
         const qrCodeData = `qrcode:${code}`;
         const qrCodeBuffer = await QRCodeLib.toBuffer(qrCodeData, {
           width: 280,
-          margin: 1,
-          errorCorrectionLevel: 'H', // High error correction for better logo overlay support
+          margin: 2, // Slightly larger margin for better scanning
+          errorCorrectionLevel: 'H', // Maximum error correction (30% data can be damaged)
           color: {
             dark: '#000000',
             light: '#FFFFFF'
@@ -134,7 +116,7 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
           const iconX = qrX + (qrSize - iconSize) / 2;
           const iconY = qrY + (qrSize - iconSize) / 2;
           
-          // Draw white circular background for better contrast and readability
+          // Draw white circular background for better contrast and readibility
           const bgRadius = iconSize / 2 + 4;
           const bgCenterX = iconX + iconSize / 2;
           const bgCenterY = iconY + iconSize / 2;
@@ -160,11 +142,11 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
         // Number below QR code - very close spacing
         const numberY = qrY + qrSize + 15; // Only 15px gap between QR and number
         
-        // Draw number text - use custom Roboto-ExtraBold font
+        // Draw number text - use ONLY custom Roboto-ExtraBold font
         ctx.fillStyle = '#000000';
         
-        // Try to use custom font first, with fallbacks
-        ctx.font = 'bold 28px RobotoExtraBold, SystemBold, Arial, sans-serif';
+        // Use ONLY RobotoExtraBold font - NO FALLBACKS
+        ctx.font = 'bold 28px RobotoExtraBold';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         

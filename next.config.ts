@@ -18,6 +18,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Ensure font files are available in serverless functions
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Copy font files to server build
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@fonts': require('path').join(__dirname, 'public/fonts'),
+      };
+    }
+    return config;
+  },
   // PWA configuration
   headers: async () => {
     return [
