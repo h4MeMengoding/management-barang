@@ -66,6 +66,45 @@ export async function generateQRCodeWithNumberBelow(code: string): Promise<strin
         const qrImage = await loadImage(qrCodeBuffer);
         ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
         
+        // Add favicon in the center of QR code
+        try {
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          
+          // Load favicon from public folder
+          const faviconPath = path.join(process.cwd(), 'public', 'favicon-32x32.png');
+          const faviconBuffer = await fs.readFile(faviconPath);
+          const faviconImage = await loadImage(faviconBuffer);
+          
+          // Calculate center position for favicon
+          const faviconSize = 28; // Size of favicon overlay (slightly smaller for this version)
+          const faviconX = qrX + (qrSize - faviconSize) / 2;
+          const faviconY = qrY + (qrSize - faviconSize) / 2;
+          
+          // Draw white background circle behind favicon for better contrast
+          const bgRadius = faviconSize / 2 + 3;
+          const bgCenterX = faviconX + faviconSize / 2;
+          const bgCenterY = faviconY + faviconSize / 2;
+          
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(bgCenterX, bgCenterY, bgRadius, 0, 2 * Math.PI);
+          ctx.fill();
+          
+          // Draw border around the white background
+          ctx.strokeStyle = '#e5e5e5';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(bgCenterX, bgCenterY, bgRadius, 0, 2 * Math.PI);
+          ctx.stroke();
+          
+          // Draw favicon
+          ctx.drawImage(faviconImage, faviconX, faviconY, faviconSize, faviconSize);
+          
+        } catch (faviconError) {
+          console.warn('Could not load favicon, skipping overlay:', faviconError);
+        }
+        
         // Number below QR code - minimal spacing
         const numberY = qrY + qrSize + 10; // Only 10px gap between QR and number
         

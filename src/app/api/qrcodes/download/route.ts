@@ -42,12 +42,82 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
         const qrImage = await loadImage(qrCodeBuffer);
         ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
         
+        // Add favicon in the center of QR code
+        try {
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          
+          // Load icon from public/icons folder - using high quality 512px version
+          const iconPath = path.join(process.cwd(), 'public', 'icons', 'icon-barangku-512.png');
+          const iconBuffer = await fs.readFile(iconPath);
+          const iconImage = await loadImage(iconBuffer);
+          
+          // Calculate center position for icon - larger size but safe for QR scanning
+          const iconSize = 60; // Larger for better visibility
+          const iconX = qrX + (qrSize - iconSize) / 2;
+          const iconY = qrY + (qrSize - iconSize) / 2;
+          
+          // Draw white background with shadow for icon (simple rectangle)
+          const padding = 6;
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
+          
+          // Draw background rectangle
+          ctx.fillRect(iconX - padding, iconY - padding, iconSize + padding * 2, iconSize + padding * 2);
+          
+          // Reset shadow
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          
+          // Draw icon directly (no clipping)
+          ctx.drawImage(iconImage, iconX, iconY, iconSize, iconSize);
+          
+        } catch (faviconError) {
+          console.warn('Could not load favicon, skipping overlay:', faviconError);
+        }
+        
         // Number below QR code - very close spacing
         const numberY = qrY + qrSize + 15; // Only 15px gap between QR and number
         
-        // Draw number text - bold and appropriately sized
+        // Draw number text - using web-safe fonts that work on Vercel
         ctx.fillStyle = '#000000';
-        ctx.font = 'bold 28px Arial, sans-serif'; // Slightly smaller for better proportion
+        
+        // Try to use DejaVu Sans (commonly available on Vercel/Linux servers)
+        // Fallback to other common server fonts
+        const fonts = [
+          '28px "DejaVu Sans", sans-serif',
+          '28px "Liberation Sans", sans-serif', 
+          '28px "Nimbus Sans L", sans-serif',
+          '28px "FreeSans", sans-serif',
+          '28px sans-serif' // Final fallback
+        ];
+        
+        // Try each font until one works
+        let fontSet = false;
+        for (const font of fonts) {
+          try {
+            ctx.font = `bold ${font}`;
+            // Test if font is actually available by measuring text
+            const metrics = ctx.measureText(code);
+            if (metrics.width > 0) {
+              fontSet = true;
+              break;
+            }
+          } catch {
+            console.warn(`Font ${font} not available, trying next...`);
+          }
+        }
+        
+        // If no font worked, use the most basic fallback
+        if (!fontSet) {
+          ctx.font = 'bold 28px monospace';
+        }
+        
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         
