@@ -8,7 +8,7 @@ export async function generateSimpleQRCode(code: string): Promise<string> {
     const dataUrl = await QRCodeLib.toDataURL(qrCodeData, {
       width: 400,
       margin: 4,
-      errorCorrectionLevel: 'M',
+      errorCorrectionLevel: 'H', // High error correction for consistency
       color: {
         dark: '#000000',
         light: '#FFFFFF'
@@ -33,14 +33,63 @@ export async function generateQRCodeWithNumberBelow(code: string): Promise<strin
     // Check if we're in a server environment that supports canvas
     if (typeof window === 'undefined') {
       try {
-        const { createCanvas, loadImage } = await import('canvas');
+        const { createCanvas, loadImage, registerFont } = await import('canvas');
+        
+        // Register custom Roboto-ExtraBold font from public/fonts/
+        try {
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          
+          // Try to load custom font from public/fonts/
+          const customFontPaths = [
+            path.join(process.cwd(), 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
+            // Vercel specific path
+            path.join('/var/task', 'public', 'fonts', 'Roboto-ExtraBold.ttf')
+          ];
+          
+          let fontRegistered = false;
+          for (const fontPath of customFontPaths) {
+            try {
+              await fs.access(fontPath);
+              registerFont(fontPath, { family: 'RobotoExtraBold' });
+              console.log(`Registered custom font from: ${fontPath}`);
+              fontRegistered = true;
+              break;
+            } catch {
+              console.log(`Custom font not found at: ${fontPath}`);
+            }
+          }
+          
+          // Fallback to system fonts if custom font fails
+          if (!fontRegistered) {
+            const systemFontPaths = [
+              '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+              '/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',
+              '/System/Library/Fonts/Helvetica.ttc',
+              '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
+            ];
+            
+            for (const fontPath of systemFontPaths) {
+              try {
+                await fs.access(fontPath);
+                registerFont(fontPath, { family: 'SystemBold' });
+                console.log(`Registered fallback font from: ${fontPath}`);
+                break;
+              } catch {
+                // Font not found, try next
+              }
+            }
+          }
+        } catch (fontError) {
+          console.warn('Could not register any font:', fontError);
+        }
         
         // Generate QR code as buffer first
         const qrCodeData = `qrcode:${code}`;
         const qrCodeBuffer = await QRCodeLib.toBuffer(qrCodeData, {
           width: 320,
           margin: 1,
-          errorCorrectionLevel: 'M',
+          errorCorrectionLevel: 'H', // High error correction for better logo overlay support
           color: {
             dark: '#000000',
             light: '#FFFFFF'
@@ -76,8 +125,8 @@ export async function generateQRCodeWithNumberBelow(code: string): Promise<strin
           const faviconBuffer = await fs.readFile(faviconPath);
           const faviconImage = await loadImage(faviconBuffer);
           
-          // Calculate center position for favicon
-          const faviconSize = 28; // Size of favicon overlay (slightly smaller for this version)
+          // Calculate center position for favicon - optimal size for QR readability
+          const faviconSize = Math.floor(qrSize * 0.12); // 12% of QR size for better balance
           const faviconX = qrX + (qrSize - faviconSize) / 2;
           const faviconY = qrY + (qrSize - faviconSize) / 2;
           
@@ -108,9 +157,9 @@ export async function generateQRCodeWithNumberBelow(code: string): Promise<strin
         // Number below QR code - minimal spacing
         const numberY = qrY + qrSize + 10; // Only 10px gap between QR and number
         
-        // Draw locker number - large, bold, clean
+        // Draw locker number with custom Roboto-ExtraBold font
         ctx.fillStyle = '#000000';
-        ctx.font = 'bold 36px Arial, sans-serif'; // Larger font for better visibility
+        ctx.font = 'bold 36px RobotoExtraBold, SystemBold, Arial, sans-serif'; // Use custom font with fallbacks
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         

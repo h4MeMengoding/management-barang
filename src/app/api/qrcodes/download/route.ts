@@ -11,31 +11,53 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
       try {
         const { createCanvas, loadImage, registerFont } = await import('canvas');
         
-        // Try to register a system font for better Vercel compatibility
+        // Register custom Roboto-ExtraBold font from public/fonts/
         try {
-          // Register DejaVu Sans if available (common on Linux/Vercel)
           const fs = await import('fs/promises');
+          const path = await import('path');
           
-          // Common font paths on Vercel/Linux systems
-          const fontPaths = [
-            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-            '/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',
-            '/System/Library/Fonts/Helvetica.ttc', // macOS fallback
-            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
+          // Try to load custom font from public/fonts/
+          const customFontPaths = [
+            path.join(process.cwd(), 'public', 'fonts', 'Roboto-ExtraBold.ttf'),
+            // Vercel specific path
+            path.join('/var/task', 'public', 'fonts', 'Roboto-ExtraBold.ttf')
           ];
           
-          for (const fontPath of fontPaths) {
+          let fontRegistered = false;
+          for (const fontPath of customFontPaths) {
             try {
               await fs.access(fontPath);
-              registerFont(fontPath, { family: 'MyCustomFont' });
-              console.log(`Registered font from: ${fontPath}`);
+              registerFont(fontPath, { family: 'RobotoExtraBold' });
+              console.log(`Registered custom font from: ${fontPath}`);
+              fontRegistered = true;
               break;
             } catch {
-              // Font not found, try next
+              console.log(`Custom font not found at: ${fontPath}`);
+            }
+          }
+          
+          // Fallback to system fonts if custom font fails
+          if (!fontRegistered) {
+            const systemFontPaths = [
+              '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+              '/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',
+              '/System/Library/Fonts/Helvetica.ttc', // macOS fallback
+              '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
+            ];
+            
+            for (const fontPath of systemFontPaths) {
+              try {
+                await fs.access(fontPath);
+                registerFont(fontPath, { family: 'SystemBold' });
+                console.log(`Registered fallback font from: ${fontPath}`);
+                break;
+              } catch {
+                // Font not found, try next
+              }
             }
           }
         } catch (fontError) {
-          console.warn('Could not register custom font:', fontError);
+          console.warn('Could not register any font:', fontError);
         }
         
         // Generate QR code as buffer first
@@ -43,7 +65,7 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
         const qrCodeBuffer = await QRCodeLib.toBuffer(qrCodeData, {
           width: 280,
           margin: 1,
-          errorCorrectionLevel: 'M',
+          errorCorrectionLevel: 'H', // High error correction for better logo overlay support
           color: {
             dark: '#000000',
             light: '#FFFFFF'
@@ -106,29 +128,29 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
           
           const iconImage = await loadImage(iconBuffer);
           
-          // Calculate center position for icon - larger size but safe for QR scanning
-          const iconSize = 60; // Larger for better visibility
+          // Calculate center position for icon - optimal size for QR code readability
+          // QR codes can handle up to 30% coverage in center area with error correction
+          const iconSize = Math.floor(qrSize * 0.15); // 15% of QR size for better readability
           const iconX = qrX + (qrSize - iconSize) / 2;
           const iconY = qrY + (qrSize - iconSize) / 2;
           
-          // Draw white background with shadow for icon (simple rectangle)
-          const padding = 6;
+          // Draw white circular background for better contrast and readability
+          const bgRadius = iconSize / 2 + 4;
+          const bgCenterX = iconX + iconSize / 2;
+          const bgCenterY = iconY + iconSize / 2;
+          
+          // Create circular white background
           ctx.fillStyle = '#ffffff';
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
+          ctx.beginPath();
+          ctx.arc(bgCenterX, bgCenterY, bgRadius, 0, 2 * Math.PI);
+          ctx.fill();
           
-          // Draw background rectangle
-          ctx.fillRect(iconX - padding, iconY - padding, iconSize + padding * 2, iconSize + padding * 2);
+          // Add subtle border to the circle
+          ctx.strokeStyle = '#e5e5e5';
+          ctx.lineWidth = 1;
+          ctx.stroke();
           
-          // Reset shadow
-          ctx.shadowColor = 'transparent';
-          ctx.shadowBlur = 0;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-          
-          // Draw icon directly (no clipping)
+          // Draw icon with proper scaling to maintain aspect ratio
           ctx.drawImage(iconImage, iconX, iconY, iconSize, iconSize);
           
         } catch (faviconError) {
@@ -138,17 +160,17 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
         // Number below QR code - very close spacing
         const numberY = qrY + qrSize + 15; // Only 15px gap between QR and number
         
-        // Draw number text - use simple approach that works on Vercel
+        // Draw number text - use custom Roboto-ExtraBold font
         ctx.fillStyle = '#000000';
         
-        // Use basic font without trying to detect - let canvas handle fallback
-        ctx.font = 'bold 28px Arial, sans-serif';
+        // Try to use custom font first, with fallbacks
+        ctx.font = 'bold 28px RobotoExtraBold, SystemBold, Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         
         const numberX = canvasWidth / 2;
         
-        // Add text with stroke for better visibility if font doesn't render properly  
+        // Add text with stroke for better visibility
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 1;
         ctx.strokeText(code, numberX, numberY);
@@ -164,7 +186,7 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
         return await QRCodeLib.toBuffer(qrCodeData, {
           width: 320,
           margin: 4,
-          errorCorrectionLevel: 'M',
+          errorCorrectionLevel: 'H', // High error correction
           color: {
             dark: '#000000',
             light: '#FFFFFF'
@@ -177,7 +199,7 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
       return await QRCodeLib.toBuffer(qrCodeData, {
         width: 320,
         margin: 4,
-        errorCorrectionLevel: 'M',
+        errorCorrectionLevel: 'H', // High error correction
         color: {
           dark: '#000000',
           light: '#FFFFFF'
@@ -191,7 +213,7 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
     return await QRCodeLib.toBuffer(qrCodeData, {
       width: 320,
       margin: 4,
-      errorCorrectionLevel: 'M',
+      errorCorrectionLevel: 'H', // High error correction
       color: {
         dark: '#000000',
         light: '#FFFFFF'
