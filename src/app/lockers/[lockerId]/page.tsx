@@ -127,12 +127,41 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
     );
   };
 
-  const downloadQRCode = () => {
+  const downloadQRCode = async () => {
     if (locker) {
-      const link = document.createElement('a');
-      link.download = `qr-code-${locker.code}.png`;
-      link.href = locker.qrCode;
-      link.click();
+      try {
+        // Try to get QR code with number below for download using locker code
+        const response = await fetch('/api/qrcodes/download', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ code: locker.code }),
+        });
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `qr-code-${locker.code}.png`;
+          link.href = url;
+          link.click();
+          window.URL.revokeObjectURL(url);
+        } else {
+          // Fallback to original QR code
+          const link = document.createElement('a');
+          link.download = `qr-code-${locker.code}.png`;
+          link.href = locker.qrCode;
+          link.click();
+        }
+      } catch (error) {
+        console.error('Error downloading QR code:', error);
+        // Fallback to original QR code
+        const link = document.createElement('a');
+        link.download = `qr-code-${locker.code}.png`;
+        link.href = locker.qrCode;
+        link.click();
+      }
     }
   };
 
@@ -145,20 +174,102 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
             <head>
               <title>QR Code - ${locker.label}</title>
               <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-                .qr-container { margin: 20px 0; }
-                .qr-code { width: 200px; height: 200px; }
-                .info { margin: 10px 0; }
+                @page {
+                  margin: 0.5in;
+                  size: A4;
+                }
+                body { 
+                  font-family: system-ui, -apple-system, sans-serif; 
+                  text-align: center; 
+                  padding: 40px 20px;
+                  background: #f8f9fa;
+                  margin: 0;
+                }
+                .qr-card {
+                  background: white;
+                  border-radius: 20px;
+                  padding: 30px;
+                  margin: 20px auto;
+                  max-width: 400px;
+                  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                  border: 2px solid #e5e7eb;
+                }
+                .qr-container { 
+                  margin: 20px 0; 
+                  padding: 20px;
+                  background: #f8f9fa;
+                  border-radius: 15px;
+                  border: 1px solid #e5e7eb;
+                }
+                .qr-code { 
+                  width: 280px; 
+                  height: 280px; 
+                  margin: 0 auto;
+                  border-radius: 10px;
+                }
+                .number-label {
+                  background: #e5e7eb;
+                  border: 1px solid #d1d5db;
+                  border-radius: 15px;
+                  padding: 15px 25px;
+                  margin: 20px auto;
+                  display: inline-block;
+                  min-width: 120px;
+                }
+                .loker-text {
+                  font-size: 12px;
+                  color: #6b7280;
+                  margin-bottom: 5px;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 1px;
+                }
+                .loker-number {
+                  font-size: 32px;
+                  font-weight: bold;
+                  color: #1f2937;
+                  font-family: 'Courier New', monospace;
+                  letter-spacing: 2px;
+                }
+                .info { 
+                  margin: 20px 0; 
+                  color: #374151;
+                }
+                .info h2 {
+                  font-size: 24px;
+                  margin-bottom: 10px;
+                  color: #1f2937;
+                }
+                .info p {
+                  margin: 8px 0;
+                  color: #6b7280;
+                }
+                .footer {
+                  margin-top: 30px;
+                  font-size: 12px;
+                  color: #9ca3af;
+                  border-top: 1px solid #e5e7eb;
+                  padding-top: 15px;
+                }
               </style>
             </head>
             <body>
-              <div class="info">
-                <h2>${locker.label}</h2>
-                <p>Kode: ${locker.code}</p>
-                ${locker.description ? `<p>${locker.description}</p>` : ''}
-              </div>
-              <div class="qr-container">
-                <img src="${locker.qrCode}" alt="QR Code" class="qr-code" />
+              <div class="qr-card">
+                <div class="info">
+                  <h2>${locker.label}</h2>
+                  <p><strong>Kode:</strong> ${locker.code}</p>
+                  ${locker.description ? `<p><strong>Deskripsi:</strong> ${locker.description}</p>` : ''}
+                </div>
+                <div class="qr-container">
+                  <img src="${locker.qrCode}" alt="QR Code" class="qr-code" />
+                </div>
+                <div class="number-label">
+                  <div class="loker-text">Loker</div>
+                  <div class="loker-number">${locker.code}</div>
+                </div>
+                <div class="footer">
+                  Management Barang - ${new Date().toLocaleDateString('id-ID')}
+                </div>
               </div>
               <script>window.print();</script>
             </body>

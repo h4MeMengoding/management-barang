@@ -88,14 +88,37 @@ export default function QRCodesPage() {
       setLoading(true);
       const zip = new JSZip();
 
-      // Convert each QR code image to blob and add to zip
+      // Convert each QR code image to blob and add to zip with number below
       for (const qr of qrCodes) {
         try {
-          const response = await fetch(qr.qrCode);
-          const blob = await response.blob();
-          zip.file(`QR-${qr.code}.png`, blob);
+          // Generate QR code with number below for download
+          const response = await fetch('/api/qrcodes/download', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code: qr.code }),
+          });
+          
+          if (response.ok) {
+            const blob = await response.blob();
+            zip.file(`QR-${qr.code}.png`, blob);
+          } else {
+            // Fallback to original QR code
+            const fallbackResponse = await fetch(qr.qrCode);
+            const blob = await fallbackResponse.blob();
+            zip.file(`QR-${qr.code}.png`, blob);
+          }
         } catch (error) {
           console.error(`Error processing QR code ${qr.code}:`, error);
+          // Try fallback
+          try {
+            const response = await fetch(qr.qrCode);
+            const blob = await response.blob();
+            zip.file(`QR-${qr.code}.png`, blob);
+          } catch (fallbackError) {
+            console.error(`Fallback failed for QR code ${qr.code}:`, fallbackError);
+          }
         }
       }
 
@@ -103,7 +126,7 @@ export default function QRCodesPage() {
       const content = await zip.generateAsync({ type: 'blob' });
       saveAs(content, `QR-Codes-${new Date().toISOString().split('T')[0]}.zip`);
       
-      showSuccess(`${qrCodes.length} QR codes berhasil didownload dalam file ZIP!`);
+      showSuccess(`${qrCodes.length} QR codes berhasil didownload dengan nomor loker di bawah QR code dalam file ZIP!`);
     } catch (error) {
       console.error('Error creating ZIP file:', error);
       showError('Terjadi kesalahan saat membuat file ZIP');
@@ -117,7 +140,7 @@ export default function QRCodesPage() {
     
     showCustomConfirm(
       'Regenerasi QR Codes',
-      'Apakah Anda yakin ingin meregenerasi semua QR codes? Ini akan memperbarui semua QR codes dengan tampilan angka loker di tengah.',
+      'Apakah Anda yakin ingin meregenerasi semua QR codes? Ini akan memperbarui semua QR codes dengan tampilan nomor loker yang jelas di bawah QR code.',
       'Regenerasi',
       async () => {
         setLoading(true);
@@ -128,7 +151,7 @@ export default function QRCodesPage() {
 
           if (response.ok) {
             const data = await response.json();
-            showSuccess(`${data.qrCodes.length} QR codes berhasil diregenerasi dengan angka di tengah!`);
+            showSuccess(`${data.qrCodes.length} QR codes berhasil diregenerasi dengan nomor loker di bawah QR code!`);
             // Reload the QR codes to show updated versions
             await loadExistingQRCodes();
           } else {
@@ -238,7 +261,7 @@ export default function QRCodesPage() {
                   <li>Print dan tempel QR codes ke loker fisik</li>
                   <li>Gunakan fitur &quot;Scan QR Code&quot; untuk menginisialisasi loker baru</li>
                   <li>Setelah scan, Anda akan diminta untuk mengisi nama dan deskripsi loker</li>
-                  <li>QR codes yang baru dibuat sudah dilengkapi dengan angka loker di tengah untuk memudahkan identifikasi manual</li>
+                  <li>QR codes yang baru dibuat sudah dilengkapi dengan nomor loker yang jelas di bawah QR code untuk memudahkan identifikasi manual</li>
                 </ol>
               </div>
               
@@ -297,13 +320,13 @@ export default function QRCodesPage() {
           {view === 'manage' && (
             <div className="space-y-6">
               <div className="bg-green-900/20 border border-green-700/30 rounded-lg p-6">
-                <h3 className="text-green-300 font-medium mb-3">✨ QR Codes dengan Angka Loker</h3>
+                <h3 className="text-green-300 font-medium mb-3">✨ QR Codes dengan Nomor Loker</h3>
                 <p className="text-green-200 text-sm mb-3">
-                  QR codes yang baru dibuat sudah dilengkapi dengan angka loker di tengah untuk memudahkan identifikasi manual. 
-                  Jika QR codes lama tidak memiliki angka di tengah, gunakan tombol &quot;Update QR Codes&quot; untuk memperbarui semua QR codes.
+                  QR codes yang dibuat sudah dilengkapi dengan nomor loker yang ditampilkan di bawah QR code untuk memudahkan identifikasi manual. 
+                  Jika QR codes lama tidak memiliki tampilan nomor yang jelas, gunakan tombol &quot;Update QR Codes&quot; untuk memperbarui semua QR codes.
                 </p>
                 <div className="text-green-200 text-xs">
-                  💡 Fitur ini memungkinkan Anda menemukan loker secara manual tanpa perlu scan QR code
+                  💡 Fitur ini memungkinkan Anda menemukan loker secara manual tanpa perlu scan QR code, nomor loker akan terlihat jelas di bawah QR code baik saat dicetak maupun didownload
                 </div>
               </div>
               
@@ -325,7 +348,7 @@ export default function QRCodesPage() {
                     onClick={regenerateAllQRCodes}
                     disabled={loading || qrCodes.length === 0}
                     className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
-                    title="Regenerasi semua QR codes dengan angka di tengah"
+                    title="Regenerasi semua QR codes dengan nomor loker yang jelas di bawah QR code"
                   >
                     {loading ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>

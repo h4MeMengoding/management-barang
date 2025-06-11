@@ -154,20 +154,22 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
 
   if (printMode) {
     return (
-      <div className="border border-gray-300 rounded-lg p-4 text-center bg-white print:bg-white">
-        <div className="mb-2">
+      <div className="border-2 border-gray-200 rounded-2xl p-6 text-center bg-white print:bg-white shadow-sm">
+        <div className="mb-4">
           <Image
             src={qrCode.qrCode}
             alt={`QR Code ${qrCode.code}`}
-            width={120}
-            height={120}
-            className="mx-auto"
+            width={140}
+            height={140}
+            className="mx-auto rounded-lg"
           />
         </div>
-        <div className="text-sm font-mono font-bold text-gray-900">
-          {qrCode.code}
+        {/* Number displayed below QR code with better styling */}
+        <div className="bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 mt-3">
+          <div className="text-xs font-medium text-gray-600 mb-1">LOKER</div>
+          <div className="font-mono text-2xl font-bold text-gray-900 tracking-wider">{qrCode.code}</div>
         </div>
-        <div className="text-xs text-gray-600 mt-1">
+        <div className="text-xs text-gray-500 mt-3">
           ID: {qrCode._id.slice(-6)}
         </div>
       </div>
@@ -193,14 +195,14 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
               title="Klik untuk memperbesar QR Code"
             />
           </div>
+          {/* Display the number prominently below QR code */}
+          <div className="bg-gradient-to-br from-slate-700/50 to-slate-800/50 border border-slate-600/50 rounded-xl px-4 py-3 mt-3 backdrop-blur-sm">
+            <span className="text-xs font-medium text-gray-400 block mb-1">Nomor Loker</span> 
+            <span className="font-mono text-xl font-bold text-gray-100 tracking-wide">{qrCode.code}</span>
+          </div>
         </div>
       
       <div className="space-y-3">
-        <div className="text-center">
-          <span className="text-xs font-medium text-gray-400 block mb-1">Kode QR</span> 
-          <span className="font-mono text-lg font-bold text-gray-100">{qrCode.code}</span>
-        </div>
-        
         <div className="flex items-center justify-center space-x-2">
           <div className={`w-3 h-3 rounded-full ${
             qrCode.isUsed ? 'bg-green-500' : 'bg-gray-500'
