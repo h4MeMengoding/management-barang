@@ -31,7 +31,7 @@ interface StatisticsSectionProps {
 export function StatisticsSection({ lockers, items, getItemsForLocker }: StatisticsSectionProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8">
-      <div className="dark-stat hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-blue-900/20">
+      <div className="dark-stat qr-card-stroke transition-all duration-300 hover:shadow-lg hover:shadow-blue-900/20">
         <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left">
           <div className="dark-icon animate-pulse mb-2 sm:mb-0 sm:mr-3">
             <Container className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 animate-spin-slow" />
@@ -46,7 +46,7 @@ export function StatisticsSection({ lockers, items, getItemsForLocker }: Statist
         </div>
       </div>
       
-      <div className="dark-stat hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-green-900/20">
+      <div className="dark-stat qr-card-stroke transition-all duration-300 hover:shadow-lg hover:shadow-green-900/20">
         <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left">
           <div className="dark-icon animate-pulse mb-2 sm:mb-0 sm:mr-3">
             <Package className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 animate-spin-slow" />
@@ -61,7 +61,7 @@ export function StatisticsSection({ lockers, items, getItemsForLocker }: Statist
         </div>
       </div>
       
-      <div className="dark-stat hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-orange-900/20">
+      <div className="dark-stat qr-card-stroke transition-all duration-300 hover:shadow-lg hover:shadow-orange-900/20">
         <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left">
           <div className="dark-icon animate-pulse mb-2 sm:mb-0 sm:mr-3">
             <Tag className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 animate-ping-slow" />
@@ -76,7 +76,7 @@ export function StatisticsSection({ lockers, items, getItemsForLocker }: Statist
         </div>
       </div>
       
-      <div className="dark-stat hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/20">
+      <div className="dark-stat qr-card-stroke transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/20">
         <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left">
           <div className="dark-icon animate-pulse mb-2 sm:mb-0 sm:mr-3">
             <QrCode className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500 animate-float" />

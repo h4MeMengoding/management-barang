@@ -101,7 +101,7 @@ export function LockerGrid({
       {lockers.map((locker) => {
         const lockerItems = getItemsForLocker(locker._id);
         return (
-          <div key={locker._id} className="dark-card p-6 hover:scale-105 transition-all duration-300 group">
+          <div key={locker._id} className="dark-card qr-card-stroke p-6 transition-all duration-300 group">
             <div className="flex justify-between items-start mb-4">
               <Link href={`/lockers/${locker._id}`} className="flex-1 cursor-pointer">
                 <div>

@@ -213,55 +213,59 @@ export default function QRCodesPage() {
 
   return (
     <div className="min-h-screen dark-theme pt-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="mb-4 sm:mb-6 lg:mb-8">
           <button
             onClick={() => router.push('/')}
-            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-6 dark-button px-4 py-2 transition-all duration-200 transform active:scale-95"
+            className="flex items-center space-x-2 text-gray-300 hover:text-gray-100 mb-4 sm:mb-6 dark-button px-3 sm:px-4 py-2.5 transition-all duration-200 transform active:scale-95 text-sm sm:text-base min-h-[44px]"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
             <span>Kembali</span>
           </button>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-100 mb-2">
-            Manajemen QR Code Loker
-          </h1>
-          <p className="text-gray-400">
-            Generate QR codes dalam batch, cetak dan tempel ke loker fisik, lalu scan untuk menginisialisasi loker baru.
-          </p>
+          <div className="space-y-2 sm:space-y-3">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-100 leading-tight">
+              Manajemen QR Code Loker
+            </h1>
+            <p className="text-gray-400 text-sm sm:text-base leading-relaxed max-w-4xl pr-4">
+              Generate QR codes dalam batch, cetak dan tempel ke loker fisik, lalu scan untuk menginisialisasi loker baru.
+            </p>
+          </div>
         </div>
 
-        <div className="dark-card p-8">
+        <div className="dark-card p-4 sm:p-6 lg:p-8">
           {/* Navigation Tabs */}
-          <div className="flex space-x-2 mb-8 p-1 bg-slate-800/30 rounded-lg border border-slate-700/30">
+          <div className="flex space-x-1 sm:space-x-2 mb-6 sm:mb-8 p-1 bg-slate-800/30 rounded-lg border border-slate-700/30">
             <button
               onClick={() => setView('generate')}
-              className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200 transform active:scale-95 ${
+              className={`flex-1 px-2 sm:px-4 py-2 sm:py-3 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 transform active:scale-95 ${
                 view === 'generate'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'text-gray-400 hover:text-gray-200 hover:bg-slate-700/30'
               }`}
             >
-              <QrCode className="inline-block w-4 h-4 mr-2" />
-              Generate QR Codes
+              <QrCode className="inline-block w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden xs:inline">Generate QR Codes</span>
+              <span className="xs:hidden">Generate</span>
             </button>
             <button
               onClick={() => setView('manage')}
-              className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200 transform active:scale-95 ${
+              className={`flex-1 px-2 sm:px-4 py-2 sm:py-3 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 transform active:scale-95 ${
                 view === 'manage'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'text-gray-400 hover:text-gray-200 hover:bg-slate-700/30'
               }`}
             >
-              <Eye className="inline-block w-4 h-4 mr-2" />
-              Kelola QR Codes
+              <Eye className="inline-block w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden xs:inline">Kelola QR Codes</span>
+              <span className="xs:hidden">Kelola</span>
             </button>
           </div>
 
           {view === 'generate' && (
-            <div className="space-y-6">
-              <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-6">
-                <h3 className="text-blue-300 font-medium mb-3">📋 Cara Penggunaan</h3>
-                <ol className="text-blue-200 text-sm space-y-2 list-decimal list-inside">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 sm:p-6">
+                <h3 className="text-blue-300 font-medium mb-3 text-sm sm:text-base">📋 Cara Penggunaan</h3>
+                <ol className="text-blue-200 text-xs sm:text-sm space-y-1.5 sm:space-y-2 list-decimal list-inside leading-relaxed">
                   <li>Generate QR codes dalam batch (misalnya 10-50 QR codes sekaligus)</li>
                   <li>Setelah generate, lihat hasilnya di menu &quot;Kelola QR Codes&quot;</li>
                   <li>Download QR codes dalam format ZIP untuk dicetak</li>
@@ -272,16 +276,16 @@ export default function QRCodesPage() {
                 </ol>
               </div>
               
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div>
-                  <label htmlFor="batchSize" className="block text-sm font-medium text-gray-300 mb-3">
+                  <label htmlFor="batchSize" className="block text-sm font-medium text-gray-300 mb-2 sm:mb-3">
                     Jumlah QR Code yang akan dibuat
                   </label>
                   <select
                     id="batchSize"
                     value={batchSize}
                     onChange={(e) => setBatchSize(Number(e.target.value))}
-                    className="w-full dark-input text-gray-200"
+                    className="w-full dark-input text-gray-200 min-h-[44px]"
                   >
                     <option value={2}>2 QR Codes</option>
                     <option value={5}>5 QR Codes</option>
@@ -292,7 +296,7 @@ export default function QRCodesPage() {
                 <button
                   onClick={generateQRCodes}
                   disabled={loading}
-                  className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
+                  className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 min-h-[44px] text-sm sm:text-base"
                 >
                   {loading ? (
                     <>
@@ -341,11 +345,11 @@ export default function QRCodesPage() {
                 <h3 className="text-lg font-medium text-gray-200">
                   Semua QR Codes ({qrCodes.length})
                 </h3>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                   <button
                     onClick={downloadAllQRCodes}
                     disabled={loading || qrCodes.length === 0}
-                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
+                    className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 text-sm min-h-[44px] w-full xs:w-auto"
                     title="Download semua QR codes dalam file ZIP"
                   >
                     <Download size={16} />
@@ -354,7 +358,7 @@ export default function QRCodesPage() {
                   <button
                     onClick={regenerateAllQRCodes}
                     disabled={loading || qrCodes.length === 0}
-                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
+                    className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 text-sm min-h-[44px] w-full xs:w-auto"
                     title="Regenerasi semua QR codes menjadi format sederhana"
                   >
                     {loading ? (
@@ -367,7 +371,7 @@ export default function QRCodesPage() {
                   <button
                     onClick={() => loadExistingQRCodes(true)}
                     disabled={loading}
-                    className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200 disabled:opacity-50 transform active:scale-95"
+                    className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2.5 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200 disabled:opacity-50 transform active:scale-95 text-sm min-h-[44px] w-full xs:w-auto"
                   >
                     {loading ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
@@ -398,7 +402,7 @@ export default function QRCodesPage() {
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 print:grid-cols-4 print:gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 print:grid-cols-4 print:gap-2">
                   {qrCodes.map((qr) => (
                     <div key={qr._id} className="relative">
                       <QRCodeDisplay
@@ -409,7 +413,7 @@ export default function QRCodesPage() {
                       {!qr.isUsed && (
                         <button
                           onClick={() => deleteQRCode(qr._id)}
-                          className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-all duration-200 print:hidden transform active:scale-95"
+                          className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-all duration-200 print:hidden transform active:scale-95 min-h-[36px] min-w-[36px] flex items-center justify-center"
                           title="Hapus QR Code"
                         >
                           <Trash2 size={16} />

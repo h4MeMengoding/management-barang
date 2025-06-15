@@ -181,19 +181,19 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
 
   return (
     <>
-      <div className={`dark-card qr-card-stroke p-6 ${
+      <div className={`dark-card qr-card-stroke p-4 sm:p-6 transition-all duration-300 ${
         qrCode.isUsed 
           ? 'border-green-500/30 bg-green-900/10' 
           : 'border-slate-600/30'
       }`}>
-        <div className="text-center mb-4">
-          <div className="dark-icon inline-flex p-3 mb-3">
+        <div className="text-center mb-3 sm:mb-4">
+          <div className="dark-icon inline-flex p-2 sm:p-3 mb-2 sm:mb-3">
             <Image
               src={qrCode.qrCode}
               alt={`QR Code ${qrCode.code}`}
-              width={120}
-              height={140}
-              className="rounded cursor-pointer hover:opacity-80 transition-opacity"
+              width={100}
+              height={120}
+              className="rounded cursor-pointer hover:opacity-80 transition-opacity sm:w-[120px] sm:h-[140px]"
               onClick={() => setIsModalOpen(true)}
               title="Klik untuk memperbesar QR Code"
             />
@@ -201,20 +201,20 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
           {/* QR code is now clean and simple */}
         </div>
       
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {/* QR Code */}
         <div className="text-center">
-          <div className="font-mono text-lg font-semibold text-white mb-2">
+          <div className="font-mono text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">
             {qrCode.code}
           </div>
         </div>
 
         {/* Status */}
         <div className="flex items-center justify-center space-x-2">
-          <div className={`w-3 h-3 rounded-full ${
+          <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${
             qrCode.isUsed ? 'bg-green-500' : 'bg-gray-500'
           }`}></div>
-          <span className={`text-sm font-medium ${
+          <span className={`text-xs sm:text-sm font-medium ${
             qrCode.isUsed ? 'text-green-400' : 'text-gray-400'
           }`}>
             {qrCode.isUsed ? 'Sudah Digunakan' : 'Belum Digunakan'}
@@ -225,18 +225,18 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
         {showDetails && (
           <>
             {qrCode.isUsed && qrCode.lockerId ? (
-              <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3">
+              <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-2 sm:p-3">
                 <div className="text-center">
                   <div className="text-xs text-green-300 font-medium mb-1">
                     Terhubung dengan Loker
                   </div>
-                  <div className="text-sm text-green-400 font-semibold break-words">
+                  <div className="text-xs sm:text-sm text-green-400 font-semibold break-words">
                     {typeof qrCode.lockerId === 'object' ? qrCode.lockerId.label : String(qrCode.lockerId)}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-800/30 border border-gray-600/30 rounded-lg p-3">
+              <div className="bg-gray-800/30 border border-gray-600/30 rounded-lg p-2 sm:p-3">
                 <div className="text-center">
                   <div className="text-xs text-gray-400 font-medium">
                     Belum terhubung dengan loker

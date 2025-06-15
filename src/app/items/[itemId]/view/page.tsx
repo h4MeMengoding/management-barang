@@ -91,7 +91,7 @@ export default function ItemViewPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-slate-700 rounded w-1/4 mb-6"></div>
-            <div className="dark-card p-8">
+            <div className="dark-card qr-card-stroke p-8">
               <div className="h-12 bg-slate-700 rounded w-3/4 mb-4"></div>
               <div className="h-6 bg-slate-700 rounded w-1/2 mb-8"></div>
               <div className="space-y-6">
@@ -118,7 +118,7 @@ export default function ItemViewPage() {
             <span>Kembali</span>
           </button>
           
-          <div className="dark-card p-8 text-center">
+          <div className="dark-card qr-card-stroke p-8 text-center">
             <Package className="w-16 h-16 text-gray-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-100 mb-2">
               {error}
@@ -177,7 +177,7 @@ export default function ItemViewPage() {
           {/* Main Information */}
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Information Card */}
-            <div className="dark-card p-6">
+            <div className="dark-card qr-card-stroke p-6">
               <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                 <Package className="w-5 h-5 mr-2 text-blue-400" />
                 Informasi Barang
@@ -216,7 +216,7 @@ export default function ItemViewPage() {
             </div>
 
             {/* Category Card */}
-            <div className="dark-card p-6">
+            <div className="dark-card qr-card-stroke p-6">
               <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                 <Tag className="w-5 h-5 mr-2 text-green-400" />
                 Kategori
@@ -231,7 +231,7 @@ export default function ItemViewPage() {
             </div>
 
             {/* History Card */}
-            <div className="dark-card p-6">
+            <div className="dark-card qr-card-stroke p-6">
               <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                 <Calendar className="w-5 h-5 mr-2 text-orange-400" />
                 Riwayat
@@ -262,7 +262,7 @@ export default function ItemViewPage() {
 
           {/* Sidebar - Locker Information */}
           <div className="space-y-6">
-            <div className="dark-card p-6">
+            <div className="dark-card qr-card-stroke p-6">
               <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                 <MapPin className="w-5 h-5 mr-2 text-purple-400" />
                 Lokasi Penyimpanan
@@ -340,7 +340,7 @@ export default function ItemViewPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="dark-card p-6">
+            <div className="dark-card qr-card-stroke p-6">
               <h3 className="text-lg font-semibold text-gray-100 mb-4">
                 Aksi Cepat
               </h3>

@@ -88,7 +88,7 @@ export default function ItemDetailPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-slate-700 rounded w-1/4 mb-6"></div>
-            <div className="dark-card p-8">
+            <div className="dark-card qr-card-stroke p-8">
               <div className="h-12 bg-slate-700 rounded w-3/4 mb-4"></div>
               <div className="h-6 bg-slate-700 rounded w-1/2 mb-8"></div>
               <div className="space-y-6">
@@ -115,7 +115,7 @@ export default function ItemDetailPage() {
             <span>Kembali</span>
           </button>
           
-          <div className="dark-card p-8 text-center">
+          <div className="dark-card qr-card-stroke p-8 text-center">
             <Package className="w-16 h-16 text-gray-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-100 mb-2">
               {error}
@@ -173,7 +173,7 @@ export default function ItemDetailPage() {
         </div>
 
         {/* Item Details */}
-        <div className="dark-card p-8">
+        <div className="dark-card qr-card-stroke p-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column */}
             <div className="space-y-6">

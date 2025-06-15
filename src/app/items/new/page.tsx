@@ -104,7 +104,7 @@ export default function NewItem() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center dark-theme">
-        <div className="dark-card p-8">
+        <div className="dark-card qr-card-stroke p-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-4 text-gray-400 text-center">Memuat...</p>
         </div>
@@ -133,7 +133,7 @@ export default function NewItem() {
         </div>
 
         {lockers.length === 0 ? (
-          <div className="dark-card p-8 text-center">
+          <div className="dark-card qr-card-stroke p-8 text-center">
             <Package className="mx-auto h-16 w-16 text-gray-500 mb-6" />
             <h3 className="text-xl font-medium text-gray-200 mb-2">Belum ada loker</h3>
             <p className="text-gray-400 mb-6">Anda perlu membuat loker terlebih dahulu sebelum menambah barang.</p>
@@ -145,7 +145,7 @@ export default function NewItem() {
             </Link>
           </div>
         ) : (
-          <div className="dark-card p-8">
+          <div className="dark-card qr-card-stroke p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-3">

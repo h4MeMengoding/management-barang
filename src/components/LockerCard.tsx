@@ -63,7 +63,7 @@ export function LockerCard({ locker, items, onDataRefresh }: LockerCardProps) {
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <div className="dark-card p-6 hover:scale-105 transition-all duration-300 group">
+    <div className="dark-card qr-card-stroke p-6 transition-all duration-300 group">
       <div className="flex justify-between items-start mb-4">
         <Link href={`/lockers/${locker._id}`} className="flex-1 cursor-pointer">
           <div>
