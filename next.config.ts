@@ -18,6 +18,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Canvas module configuration for QR code generation
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Externalize canvas to avoid bundling issues
+      config.externals = config.externals || [];
+      config.externals.push('canvas');
+    }
+    return config;
+  },
   // PWA configuration
   headers: async () => {
     return [

@@ -3,14 +3,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import QRCodeLib from 'qrcode';
 
-// Simple QR code generation for download - clean design with just QR and number below
-async function generateCleanQRCode(code: string): Promise<Buffer> {
+// Super simple QR code generation - just QR without any canvas rendering
+async function generateSimpleQRCode(code: string): Promise<Buffer> {
   try {
-    // For now, just generate a simple QR code without canvas to avoid build issues
     const qrCodeData = `qrcode:${code}`;
     return await QRCodeLib.toBuffer(qrCodeData, {
-      width: 320,
-      margin: 4,
+      width: 400,
+      margin: 2,
       errorCorrectionLevel: 'M',
       color: {
         dark: '#000000',
@@ -18,7 +17,7 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
       }
     });
   } catch (error) {
-    console.error('Error generating clean QR code:', error);
+    console.error('Error generating simple QR code:', error);
     throw error;
   }
 }
@@ -36,8 +35,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Code is required' }, { status: 400 });
     }
 
-    // Generate clean QR code with number below
-    const qrCodeBuffer = await generateCleanQRCode(code);
+    // Generate simple QR code without canvas
+    const qrCodeBuffer = await generateSimpleQRCode(code);
 
     // Return the image as response
     return new NextResponse(qrCodeBuffer, {
@@ -48,7 +47,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error in download QR code route:', error);
+    console.error('Error in simple download QR code route:', error);
     return NextResponse.json(
       { error: 'Failed to generate QR code' },
       { status: 500 }
