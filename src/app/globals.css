@@ -395,6 +395,55 @@ select.dark-input option {
   animation: pulse 2s ease-in-out infinite;
 }
 
+/* QR Code Card Stroke Animation */
+@keyframes border-stroke {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.qr-card-stroke {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.qr-card-stroke::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: 18px;
+  padding: 2px;
+  background: linear-gradient(45deg, 
+    rgba(59, 130, 246, 0.3),
+    rgba(147, 51, 234, 0.3),
+    rgba(59, 130, 246, 0.3),
+    rgba(147, 51, 234, 0.3)
+  );
+  background-size: 300% 300%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.qr-card-stroke:hover::before {
+  opacity: 1;
+  animation: border-stroke 3s ease-in-out infinite;
+}
+
+.qr-card-stroke:hover {
+  transform: translateY(-2px);
+}
+
 /* Responsive Design */
 @media (max-width: 640px) {
   .dark-card {

@@ -3,10 +3,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import QRCodeLib from 'qrcode';
 
-// Simple QR code generation for download - clean design with just QR and number below
+// Simple QR code generation for download - just the barcode without any overlay
 async function generateCleanQRCode(code: string): Promise<Buffer> {
   try {
-    // For now, just generate a simple QR code without canvas to avoid build issues
+    // Generate simple QR code without any overlay, number, or logo
     const qrCodeData = `qrcode:${code}`;
     return await QRCodeLib.toBuffer(qrCodeData, {
       width: 320,
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Code is required' }, { status: 400 });
     }
 
-    // Generate clean QR code with number below
+    // Generate clean QR code - just barcode without overlay
     const qrCodeBuffer = await generateCleanQRCode(code);
 
     // Return the image as response

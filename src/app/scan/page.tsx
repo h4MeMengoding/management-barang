@@ -1289,7 +1289,7 @@ function QRScannerComponent() {
                   </button>
                 </div>
                 <p className="text-xs text-gray-400">
-                  Masukkan kode 4 digit yang tertera pada QR code (tanpa awalan)
+                  Masukkan kode 4 digit loker secara manual (tanpa awalan)
                 </p>
               </div>
               

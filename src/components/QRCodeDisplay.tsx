@@ -126,11 +126,18 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
             </div>
 
             {/* Locker connection info */}
-            {qrCode.lockerId && (
-              <div className="text-center p-2 bg-green-900/20 text-green-400 rounded-lg border border-green-500/30">
-                <span className="text-xs block mb-1">Terhubung dengan</span>
-                <span className="text-xs sm:text-sm font-medium break-words">
-                  Loker: {typeof qrCode.lockerId === 'object' ? String(qrCode.lockerId.label) : String(qrCode.lockerId)}
+            {qrCode.isUsed && qrCode.lockerId ? (
+              <div className="text-center p-3 bg-green-900/20 text-green-400 rounded-lg border border-green-500/30">
+                <span className="text-xs block mb-1">✅ Terhubung dengan Loker</span>
+                <span className="text-sm sm:text-base font-semibold break-words">
+                  {typeof qrCode.lockerId === 'object' ? qrCode.lockerId.label : String(qrCode.lockerId)}
+                </span>
+              </div>
+            ) : (
+              <div className="text-center p-3 bg-gray-800/30 text-gray-400 rounded-lg border border-gray-600/30">
+                <span className="text-xs block mb-1">⏳ Belum Terhubung</span>
+                <span className="text-sm break-words">
+                  Scan QR code ini untuk membuat loker baru
                 </span>
               </div>
             )}
@@ -164,7 +171,7 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
             className="mx-auto rounded-lg"
           />
         </div>
-        {/* QR code now includes the number below, so no need for additional styling */}
+        {/* QR code is now clean and simple */}
         <div className="text-xs text-gray-500 mt-3">
           ID: {qrCode._id.slice(-6)}
         </div>
@@ -174,7 +181,7 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
 
   return (
     <>
-      <div className={`dark-card p-6 transition-all duration-300 hover:scale-105 ${
+      <div className={`dark-card qr-card-stroke p-6 ${
         qrCode.isUsed 
           ? 'border-green-500/30 bg-green-900/10' 
           : 'border-slate-600/30'
@@ -191,10 +198,18 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
               title="Klik untuk memperbesar QR Code"
             />
           </div>
-          {/* QR code now includes the number below, so no need for additional display */}
+          {/* QR code is now clean and simple */}
         </div>
       
       <div className="space-y-3">
+        {/* QR Code */}
+        <div className="text-center">
+          <div className="font-mono text-lg font-semibold text-white mb-2">
+            {qrCode.code}
+          </div>
+        </div>
+
+        {/* Status */}
         <div className="flex items-center justify-center space-x-2">
           <div className={`w-3 h-3 rounded-full ${
             qrCode.isUsed ? 'bg-green-500' : 'bg-gray-500'
@@ -206,26 +221,29 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
           </span>
         </div>
 
-        {showDetails && (
-          <>
-            <div className="pt-3 border-t border-slate-600/30">
-              <div className="text-xs text-gray-500 text-center">
-                Dibuat: {new Date(qrCode.createdAt).toLocaleDateString('id-ID', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+        {/* Locker Information */}
+        {qrCode.isUsed && qrCode.lockerId ? (
+          <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3">
+            <div className="text-center">
+              <div className="text-xs text-green-300 font-medium mb-1">
+                Terhubung dengan Loker
               </div>
-              
-              {qrCode.lockerId && (
-                <div className="text-xs text-green-400 text-center mt-2 p-2 bg-green-900/20 rounded-lg border border-green-500/30">
-                  Terhubung dengan Loker: {typeof qrCode.lockerId === 'object' ? String(qrCode.lockerId.label) : String(qrCode.lockerId)}
-                </div>
-              )}
+              <div className="text-sm text-green-400 font-semibold break-words">
+                {typeof qrCode.lockerId === 'object' ? qrCode.lockerId.label : String(qrCode.lockerId)}
+              </div>
             </div>
-          </>
+          </div>
+        ) : (
+          <div className="bg-gray-800/30 border border-gray-600/30 rounded-lg p-3">
+            <div className="text-center">
+              <div className="text-xs text-gray-400 font-medium">
+                Belum terhubung dengan loker
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                Scan QR code ini untuk membuat loker baru
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -1,6 +1,6 @@
 import QRCodeLib from 'qrcode';
 
-// Simple QR code generation without canvas overlay for better Vercel compatibility
+// Simple QR code generation - just the barcode without any overlay, number, or logo
 export async function generateSimpleQRCode(code: string): Promise<string> {
   try {
     // Generate QR code as data URL - encode with qrcode: prefix for better detection
@@ -22,13 +22,12 @@ export async function generateSimpleQRCode(code: string): Promise<string> {
   }
 }
 
-// Alias for backward compatibility - same as generateQRCodeWithNumberBelow
+// All QR code generation functions now just return simple QR codes without any overlay
 export async function generateQRCodeWithOverlay(code: string): Promise<string> {
-  return await generateQRCodeWithNumberBelow(code);
+  return await generateSimpleQRCode(code);
 }
 
-// Server-side canvas generation for QR code with number below (for download)
+// All QR code generation functions now just return simple QR codes without any overlay
 export async function generateQRCodeWithNumberBelow(code: string): Promise<string> {
-  // Always fall back to simple QR code during build to avoid canvas issues
   return await generateSimpleQRCode(code);
 }

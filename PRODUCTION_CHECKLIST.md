@@ -102,7 +102,7 @@ All core functionality is implemented and tested. The PWA features work correctl
 
 ## ✅ Debug Information Cleanup
 
-**Status**: All console.log statements have been removed from production code.
+**Status**: All console.log statements have been removed from production code. QR codes are now clean and simple without any overlays, logos, or numbers.
 
 ### Cleaned Files:
 - ✅ `src/contexts/PWAContext.tsx` - PWA installation logging removed
@@ -110,6 +110,12 @@ All core functionality is implemented and tested. The PWA features work correctl
 - ✅ `src/app/api/scan/route.ts` - API scanning logs removed
 - ✅ `src/app/api/qrcodes/regenerate/route.ts` - QR regeneration logs removed
 - ✅ `src/app/api/test-db/route.ts` - Database test logs removed
+- ✅ `src/lib/qrcode-utils.ts` - All QR generation functions now produce simple QR codes only
+- ✅ `src/app/api/lockers/route.ts` - Updated to use simple QR code generation
+- ✅ `src/app/qrcodes/page.tsx` - Updated UI text to reflect simple QR codes
+- ✅ `src/components/QRCodeDisplay.tsx` - Removed references to numbers and overlays
+- ✅ `src/app/lockers/[lockerId]/page.tsx` - Removed number display from print template
+- ✅ `src/app/scan/page.tsx` - Updated manual input description
 
 ### Note:
 - `generate-screenshots.js` console.log statements retained (development utility only)

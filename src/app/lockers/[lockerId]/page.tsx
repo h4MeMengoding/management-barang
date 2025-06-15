@@ -130,7 +130,7 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
   const downloadQRCode = async () => {
     if (locker) {
       try {
-        // Try to get QR code with number below for download using locker code
+        // Try to get clean QR code for download using locker code
         const response = await fetch('/api/qrcodes/download', {
           method: 'POST',
           headers: {
@@ -207,30 +207,6 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
                   margin: 0 auto;
                   border-radius: 10px;
                 }
-                .number-label {
-                  background: #e5e7eb;
-                  border: 1px solid #d1d5db;
-                  border-radius: 15px;
-                  padding: 15px 25px;
-                  margin: 20px auto;
-                  display: inline-block;
-                  min-width: 120px;
-                }
-                .loker-text {
-                  font-size: 12px;
-                  color: #6b7280;
-                  margin-bottom: 5px;
-                  font-weight: 600;
-                  text-transform: uppercase;
-                  letter-spacing: 1px;
-                }
-                .loker-number {
-                  font-size: 32px;
-                  font-weight: bold;
-                  color: #1f2937;
-                  font-family: 'Courier New', monospace;
-                  letter-spacing: 2px;
-                }
                 .info { 
                   margin: 20px 0; 
                   color: #374151;
@@ -262,10 +238,6 @@ function LockerDetailContent({ params }: { params: Promise<{ lockerId: string }>
                 </div>
                 <div class="qr-container">
                   <img src="${locker.qrCode}" alt="QR Code" class="qr-code" />
-                </div>
-                <div class="number-label">
-                  <div class="loker-text">Loker</div>
-                  <div class="loker-number">${locker.code}</div>
                 </div>
                 <div class="footer">
                   Management Barang - ${new Date().toLocaleDateString('id-ID')}

@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions, isValidSession } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb';
 import { Locker, User, QRCode as QRCodeModel } from '@/models';
-import { generateQRCodeWithOverlay } from '@/lib/qrcode-utils';
+import { generateSimpleQRCode } from '@/lib/qrcode-utils';
 
 export async function GET() {
   try {
@@ -64,9 +64,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Gagal generate kode unik. Silakan coba lagi.' }, { status: 500 });
     }
 
-    // Generate QR code with overlay using the same function as the QR code management page
-    // This ensures the QR codes have the locker number in the center, exactly like the ones generated in bulk
-    const qrCodeBase64 = await generateQRCodeWithOverlay(code);
+    // Generate simple QR code without any overlay
+    const qrCodeBase64 = await generateSimpleQRCode(code);
 
     // First create the locker so we have its ID
     const locker = await Locker.create({
