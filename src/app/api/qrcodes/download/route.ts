@@ -11,10 +11,10 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
       try {
         const { createCanvas, loadImage } = await import('canvas');
         
-        // Generate QR code as buffer first
+        // Generate QR code as buffer first - same parameters as display version
         const qrCodeData = `qrcode:${code}`;
         const qrCodeBuffer = await QRCodeLib.toBuffer(qrCodeData, {
-          width: 280,
+          width: 320,
           margin: 1,
           errorCorrectionLevel: 'M',
           color: {
@@ -23,9 +23,9 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
           }
         });
 
-        // Create canvas with minimal size - just QR code + number
-        const canvasWidth = 320;
-        const canvasHeight = 360; // More compact
+        // Create canvas with minimal size - same as display version
+        const canvasWidth = 300;
+        const canvasHeight = 350; // Same dimensions as display version
         const canvas = createCanvas(canvasWidth, canvasHeight);
         const ctx = canvas.getContext('2d');
         
@@ -33,10 +33,10 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
-        // QR Code positioning - centered
-        const qrSize = 280;
+        // QR Code positioning - same as display version
+        const qrSize = 260;
         const qrX = (canvasWidth - qrSize) / 2;
-        const qrY = 15; // Minimal top margin
+        const qrY = 20; // Same top margin as display version
         
         // Draw QR code
         const qrImage = await loadImage(qrCodeBuffer);
@@ -47,76 +47,48 @@ async function generateCleanQRCode(code: string): Promise<Buffer> {
           const fs = await import('fs/promises');
           const path = await import('path');
           
-          // Load icon from public/icons folder - using high quality 512px version
-          const iconPath = path.join(process.cwd(), 'public', 'icons', 'icon-barangku-512.png');
+          // Load favicon from public folder - same as display version
+          const iconPath = path.join(process.cwd(), 'public', 'favicon-32x32.png');
           const iconBuffer = await fs.readFile(iconPath);
           const iconImage = await loadImage(iconBuffer);
           
-          // Calculate center position for icon - larger size but safe for QR scanning
-          const iconSize = 60; // Larger for better visibility
+          // Calculate center position for favicon - same as display version
+          const iconSize = 28; // Same size as display version
           const iconX = qrX + (qrSize - iconSize) / 2;
           const iconY = qrY + (qrSize - iconSize) / 2;
           
-          // Draw white background with shadow for icon (simple rectangle)
-          const padding = 6;
+          // Draw white background circle behind favicon for better contrast - same as display version
+          const bgRadius = iconSize / 2 + 3;
+          const bgCenterX = iconX + iconSize / 2;
+          const bgCenterY = iconY + iconSize / 2;
+          
           ctx.fillStyle = '#ffffff';
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
+          ctx.beginPath();
+          ctx.arc(bgCenterX, bgCenterY, bgRadius, 0, 2 * Math.PI);
+          ctx.fill();
           
-          // Draw background rectangle
-          ctx.fillRect(iconX - padding, iconY - padding, iconSize + padding * 2, iconSize + padding * 2);
+          // Draw border around the white background - same as display version
+          ctx.strokeStyle = '#e5e5e5';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(bgCenterX, bgCenterY, bgRadius, 0, 2 * Math.PI);
+          ctx.stroke();
           
-          // Reset shadow
-          ctx.shadowColor = 'transparent';
-          ctx.shadowBlur = 0;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-          
-          // Draw icon directly (no clipping)
+          // Draw favicon - same as display version
           ctx.drawImage(iconImage, iconX, iconY, iconSize, iconSize);
           
         } catch (faviconError) {
           console.warn('Could not load favicon, skipping overlay:', faviconError);
         }
         
-        // Number below QR code - very close spacing
-        const numberY = qrY + qrSize + 15; // Only 15px gap between QR and number
+        // Number below QR code - same spacing as display version
+        const numberY = qrY + qrSize + 10; // Same 10px gap as display version
         
         // Draw number text - using web-safe fonts that work on Vercel
         ctx.fillStyle = '#000000';
         
-        // Try to use DejaVu Sans (commonly available on Vercel/Linux servers)
-        // Fallback to other common server fonts
-        const fonts = [
-          '28px "DejaVu Sans", sans-serif',
-          '28px "Liberation Sans", sans-serif', 
-          '28px "Nimbus Sans L", sans-serif',
-          '28px "FreeSans", sans-serif',
-          '28px sans-serif' // Final fallback
-        ];
-        
-        // Try each font until one works
-        let fontSet = false;
-        for (const font of fonts) {
-          try {
-            ctx.font = `bold ${font}`;
-            // Test if font is actually available by measuring text
-            const metrics = ctx.measureText(code);
-            if (metrics.width > 0) {
-              fontSet = true;
-              break;
-            }
-          } catch {
-            console.warn(`Font ${font} not available, trying next...`);
-          }
-        }
-        
-        // If no font worked, use the most basic fallback
-        if (!fontSet) {
-          ctx.font = 'bold 28px monospace';
-        }
+        // Use the same font configuration as the display version for consistency
+        ctx.font = 'bold 36px Arial, sans-serif';
         
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';

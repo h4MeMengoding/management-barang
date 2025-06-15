@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb';
 import { QRCode, User } from '@/models';
-import { generateSimpleQRCode } from '@/lib/qrcode-utils';
+import { generateQRCodeWithNumberBelow } from '@/lib/qrcode-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unable to generate unique codes' }, { status: 500 });
       }
 
-      // Generate QR code image using utility function
-      const qrCodeBase64 = await generateSimpleQRCode(code);
+      // Generate QR code image using enhanced utility function with logo and number below
+      const qrCodeBase64 = await generateQRCodeWithNumberBelow(code);
 
       // Save to database
       const qrCodeDoc = await QRCode.create({

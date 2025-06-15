@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb';
 import { QRCode, User } from '@/models';
-import { generateSimpleQRCode } from '@/lib/qrcode-utils';
+import { generateQRCodeWithNumberBelow } from '@/lib/qrcode-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      // Generate new QR code image
-      const qrCodeBase64 = await generateSimpleQRCode(existingQR.code);
+      // Generate new QR code image with logo and number below - same as download version
+      const qrCodeBase64 = await generateQRCodeWithNumberBelow(existingQR.code);
 
       // Update the QR code in database
       existingQR.qrCode = qrCodeBase64;
@@ -77,8 +77,8 @@ export async function PUT() {
     const updatedQRCodes = [];
     
     for (const qrCode of allQRCodes) {
-      // Generate new QR code image
-      const qrCodeBase64 = await generateSimpleQRCode(qrCode.code);
+      // Generate new QR code image with logo and number below - same as download version
+      const qrCodeBase64 = await generateQRCodeWithNumberBelow(qrCode.code);
 
       // Update the QR code in database
       qrCode.qrCode = qrCodeBase64;

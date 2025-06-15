@@ -159,16 +159,12 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
           <Image
             src={qrCode.qrCode}
             alt={`QR Code ${qrCode.code}`}
-            width={140}
-            height={140}
+            width={200}
+            height={230}
             className="mx-auto rounded-lg"
           />
         </div>
-        {/* Number displayed below QR code with better styling */}
-        <div className="bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 mt-3">
-          <div className="text-xs font-medium text-gray-600 mb-1">LOKER</div>
-          <div className="font-mono text-2xl font-bold text-gray-900 tracking-wider">{qrCode.code}</div>
-        </div>
+        {/* QR code now includes the number below, so no need for additional styling */}
         <div className="text-xs text-gray-500 mt-3">
           ID: {qrCode._id.slice(-6)}
         </div>
@@ -188,18 +184,14 @@ export default function QRCodeDisplay({ qrCode, showDetails, printMode }: QRCode
             <Image
               src={qrCode.qrCode}
               alt={`QR Code ${qrCode.code}`}
-              width={100}
-              height={100}
+              width={120}
+              height={140}
               className="rounded cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setIsModalOpen(true)}
               title="Klik untuk memperbesar QR Code"
             />
           </div>
-          {/* Display the number prominently below QR code */}
-          <div className="bg-gradient-to-br from-slate-700/50 to-slate-800/50 border border-slate-600/50 rounded-xl px-4 py-3 mt-3 backdrop-blur-sm">
-            <span className="text-xs font-medium text-gray-400 block mb-1">Nomor Loker</span> 
-            <span className="font-mono text-xl font-bold text-gray-100 tracking-wide">{qrCode.code}</span>
-          </div>
+          {/* QR code now includes the number below, so no need for additional display */}
         </div>
       
       <div className="space-y-3">
