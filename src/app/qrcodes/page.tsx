@@ -25,9 +25,13 @@ export default function QRCodesPage() {
   const [batchSize, setBatchSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<'generate' | 'manage'>('generate');
+  const [dataLoaded, setDataLoaded] = useState(false);
 
-  const loadExistingQRCodes = useCallback(async () => {
+  const loadExistingQRCodes = useCallback(async (forceReload = false) => {
     if (!session) return;
+    
+    // If not forcing reload and data already loaded, skip
+    if (!forceReload && dataLoaded) return;
 
     setLoading(true);
     try {
@@ -35,6 +39,7 @@ export default function QRCodesPage() {
       if (response.ok) {
         const data = await response.json();
         setQrCodes(Array.isArray(data) ? data : []);
+        setDataLoaded(true);
       } else {
         showError('Gagal memuat QR codes');
       }
@@ -45,13 +50,13 @@ export default function QRCodesPage() {
     } finally {
       setLoading(false);
     }
-  }, [session]);
+  }, [session, dataLoaded]);
 
   useEffect(() => {
-    if (view === 'manage') {
+    if (view === 'manage' && !dataLoaded) {
       loadExistingQRCodes();
     }
-  }, [view, loadExistingQRCodes]);
+  }, [view, dataLoaded, loadExistingQRCodes]);
 
   const generateQRCodes = async () => {
     if (!session) return;
@@ -69,6 +74,8 @@ export default function QRCodesPage() {
       if (response.ok) {
         const data = await response.json();
         showSuccess(`${data.qrCodes.length} QR codes berhasil dibuat! Lihat di menu "Kelola QR Codes" untuk melihat hasilnya.`);
+        // Invalidate cache so data will reload when user switches to manage tab
+        setDataLoaded(false);
       } else {
         const error = await response.json();
         showError(`Error: ${error.message}`);
@@ -153,7 +160,7 @@ export default function QRCodesPage() {
             const data = await response.json();
             showSuccess(`${data.qrCodes.length} QR codes berhasil diregenerasi!`);
             // Reload the QR codes to show updated versions
-            await loadExistingQRCodes();
+            await loadExistingQRCodes(true);
           } else {
             const error = await response.json();
             showError(`Error: ${error.message}`);
@@ -358,7 +365,7 @@ export default function QRCodesPage() {
                     <span>Update QR Codes</span>
                   </button>
                   <button
-                    onClick={loadExistingQRCodes}
+                    onClick={() => loadExistingQRCodes(true)}
                     disabled={loading}
                     className="flex items-center space-x-2 px-4 py-2 dark-button text-gray-300 hover:text-gray-100 font-medium transition-all duration-200 disabled:opacity-50 transform active:scale-95"
                   >
